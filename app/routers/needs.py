@@ -1,4 +1,5 @@
 from uuid import UUID
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -8,10 +9,10 @@ router = APIRouter(prefix="/api/needs", tags=["needs"])
 
 
 @router.get("", response_model=list[schemas.NeedOut])
-def list_needs(npc_id: str = None, db: Session = Depends(get_db)):
+def list_needs(npc_id: Optional[UUID] = None, db: Session = Depends(get_db)):
     q = db.query(models.Need).filter_by(is_archived=False)
     if npc_id is not None:
-        q = q.filter(models.Need.npc_id == UUID(npc_id))
+        q = q.filter(models.Need.npc_id == npc_id)
     else:
         q = q.filter(models.Need.npc_id.is_(None))
     return q.order_by(models.Need.created_at).all()
@@ -31,6 +32,8 @@ def complete_need(need_id: UUID, db: Session = Depends(get_db)):
     need = db.get(models.Need, need_id)
     if not need:
         raise HTTPException(404)
+    if need.is_archived:
+        raise HTTPException(409, detail="Need is already completed")
     need.is_archived = True
     db.commit()
     return {"done": True}
