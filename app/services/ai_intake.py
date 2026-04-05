@@ -92,6 +92,9 @@ JSON만 응답하세요. 마크다운 코드블록 없이 순수 JSON만.
     if result.get("type") == "need":
         result["subtasks"] = []
         result["quest_type"] = None
+    elif result.get("type") == "quest":
+        if result.get("quest_type") not in ("one_time", "daily"):
+            result["quest_type"] = "one_time"
 
     return result
 

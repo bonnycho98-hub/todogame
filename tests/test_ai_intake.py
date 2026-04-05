@@ -6,10 +6,10 @@ NPCS = [{"id": "11111111-1111-1111-1111-111111111111", "name": "엄마"}]
 
 
 def _mock_gemini(json_str: str):
-    """Gemini _model을 모킹하는 컨텍스트 매니저를 반환한다."""
+    """Gemini _get_model을 모킹하는 컨텍스트 매니저를 반환한다."""
     mock_model = MagicMock()
     mock_model.generate_content.return_value.text = json_str
-    return patch("app.services.ai_intake._model", mock_model)
+    return patch("app.services.ai_intake._get_model", return_value=mock_model)
 
 
 def test_parse_quest_with_npc():
