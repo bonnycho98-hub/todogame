@@ -114,14 +114,11 @@ def save_intake(db, result: dict) -> None:
         db.commit()
         return
 
-    # quest
-    if npc_id:
-        need = models.Need(npc_id=npc_id, title=result["title"])
-        db.add(need)
-        db.flush()
-        need_id = need.id
-    else:
-        need_id = None
+    # quest — 항상 Need를 먼저 생성 (npc 없으면 자기자신 니즈)
+    need = models.Need(npc_id=npc_id, title=result["title"])
+    db.add(need)
+    db.flush()
+    need_id = need.id
 
     qt = result.get("quest_type", "one_time")
     if qt not in ("one_time", "daily"):

@@ -168,6 +168,9 @@ def _format_result_text(result: dict, npc_name: str | None) -> str:
         "",
         result["title"],
     ]
+    if result["type"] == "quest":
+        quest_type_label = "매일 반복" if result.get("quest_type") == "daily" else "일회성"
+        lines.append(f"  └ 니즈로 저장 · {quest_type_label}")
     for st in result.get("subtasks", []):
         lines.append(f"  • {st}")
     lines.append("")
