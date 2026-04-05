@@ -5,7 +5,7 @@ from sqlalchemy import (
     Column, String, Integer, Boolean, DateTime, Date,
     ForeignKey, Text, Enum as SAEnum
 )
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy import JSON, Uuid
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -17,7 +17,7 @@ class QuestType(str, enum.Enum):
 
 class NPC(Base):
     __tablename__ = "npcs"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String, nullable=False)
     relation_type = Column(String, nullable=False)
     sprite = Column(Text, nullable=False)       # JSON: {"lines": [...], "color": "#hex"}
@@ -30,8 +30,8 @@ class NPC(Base):
 
 class Need(Base):
     __tablename__ = "needs"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    npc_id = Column(UUID(as_uuid=True), ForeignKey("npcs.id", ondelete="CASCADE"), nullable=True)  # NULL = self
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    npc_id = Column(Uuid(as_uuid=True), ForeignKey("npcs.id", ondelete="CASCADE"), nullable=True)  # NULL = self
     title = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -41,11 +41,11 @@ class Need(Base):
 
 class Quest(Base):
     __tablename__ = "quests"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    need_id = Column(UUID(as_uuid=True), ForeignKey("needs.id", ondelete="CASCADE"), nullable=True)  # NULL = self direct
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    need_id = Column(Uuid(as_uuid=True), ForeignKey("needs.id", ondelete="CASCADE"), nullable=True)  # NULL = self direct
     title = Column(String, nullable=False)
-    quest_type = Column(SAEnum(QuestType), nullable=False)
-    routine = Column(JSONB, nullable=True)       # {"type":"daily"} | {"type":"weekly","days":[0,2]} | {"type":"monthly","dates":[1,15]}
+    quest_type = Column(SAEnum(QuestType, values_callable=lambda x: [e.value for e in x]), nullable=False)
+    routine = Column(JSON, nullable=True)       # {"type":"daily"} | {"type":"weekly","days":[0,2]} | {"type":"monthly","dates":[1,15]}
     intimacy_reward = Column(Integer, default=10)
     is_archived = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -60,8 +60,8 @@ class Quest(Base):
 
 class Subtask(Base):
     __tablename__ = "subtasks"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    quest_id = Column(UUID(as_uuid=True), ForeignKey("quests.id", ondelete="CASCADE"), nullable=False)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    quest_id = Column(Uuid(as_uuid=True), ForeignKey("quests.id", ondelete="CASCADE"), nullable=False)
     title = Column(String, nullable=False)
     order = Column(Integer, default=0)
 
@@ -77,8 +77,8 @@ class Subtask(Base):
 
 class DailyCompletion(Base):
     __tablename__ = "daily_completions"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    subtask_id = Column(UUID(as_uuid=True), ForeignKey("subtasks.id", ondelete="CASCADE"), nullable=False)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    subtask_id = Column(Uuid(as_uuid=True), ForeignKey("subtasks.id", ondelete="CASCADE"), nullable=False)
     completed_date = Column(Date, nullable=False)
     completed_at = Column(DateTime, default=datetime.utcnow)
 
@@ -87,8 +87,8 @@ class DailyCompletion(Base):
 
 class OneTimeCompletion(Base):
     __tablename__ = "one_time_completions"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    subtask_id = Column(UUID(as_uuid=True), ForeignKey("subtasks.id", ondelete="CASCADE"), nullable=False, unique=True)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    subtask_id = Column(Uuid(as_uuid=True), ForeignKey("subtasks.id", ondelete="CASCADE"), nullable=False, unique=True)
     completed_at = Column(DateTime, default=datetime.utcnow)
 
     subtask = relationship("Subtask", back_populates="one_time_completion")
@@ -96,8 +96,8 @@ class OneTimeCompletion(Base):
 
 class IntimacyLog(Base):
     __tablename__ = "intimacy_logs"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    npc_id = Column(UUID(as_uuid=True), ForeignKey("npcs.id", ondelete="CASCADE"), nullable=True)  # NULL = self
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    npc_id = Column(Uuid(as_uuid=True), ForeignKey("npcs.id", ondelete="CASCADE"), nullable=True)  # NULL = self
     delta = Column(Integer, nullable=False)
     reason = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -107,7 +107,7 @@ class IntimacyLog(Base):
 
 class LevelReward(Base):
     __tablename__ = "level_rewards"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     level = Column(Integer, nullable=False, unique=True)
     message = Column(Text, nullable=False)
     is_claimed = Column(Boolean, default=False)
