@@ -243,6 +243,25 @@ async function renderQuestContent() {
     const quests = await api('GET', `/quests?need_id=${need.id}`);
     accordion.innerHTML += renderNeedAccordion(need, quests);
   }
+
+  // 고아 퀘스트 (need 없는 퀘스트) 표시
+  const orphans = await api('GET', '/quests/orphans');
+  if (orphans.length) {
+    accordion.innerHTML += `
+      <div class="card" style="margin-bottom:8px;border-color:var(--red)">
+        <div style="padding:8px 12px;color:var(--red);font-size:11px">⚠ 니즈 없는 퀘스트 (삭제 필요)</div>
+        <div style="padding:0 12px 8px">
+          ${orphans.map(q => `
+            <div style="display:flex;align-items:center;gap:8px;padding:4px 0">
+              <span style="flex:1;font-size:12px">${q.title}</span>
+              <button class="btn btn-sm" style="color:var(--red);border-color:var(--red)"
+                onclick="deleteQuest('${q.id}')">삭제</button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
 }
 
 function renderNeedAccordion(need, quests) {

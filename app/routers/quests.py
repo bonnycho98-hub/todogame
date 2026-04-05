@@ -24,6 +24,13 @@ def _enrich_quest(quest: models.Quest, db: Session, today: date) -> schemas.Ques
     return out
 
 
+@router.get("/orphans", response_model=list[schemas.QuestOut])
+def list_orphan_quests(db: Session = Depends(get_db)):
+    today = date.today()
+    quests = db.query(models.Quest).filter(models.Quest.need_id.is_(None)).all()
+    return [_enrich_quest(quest, db, today) for quest in quests]
+
+
 @router.get("", response_model=list[schemas.QuestOut])
 def list_quests(need_id: str, db: Session = Depends(get_db)):
     today = date.today()
