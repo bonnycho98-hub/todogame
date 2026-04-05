@@ -35,9 +35,12 @@ def get_dashboard(db: Session = Depends(get_db)):
 
     # ── 오늘의 루틴 ──────────────────────────────────────────
     # DAILY 타입이고 오늘 스케줄에 해당하는 미archived 퀘스트
-    all_daily = db.query(models.Quest).filter_by(
-        quest_type=models.QuestType.DAILY, is_archived=False
-    ).all()
+    all_daily = (
+        db.query(models.Quest)
+        .filter_by(quest_type=models.QuestType.DAILY, is_archived=False)
+        .options(selectinload(models.Quest.subtasks))
+        .all()
+    )
     routine_quests_raw = [q for q in all_daily if is_quest_active_today(q, today)]
     routine_outs = [_build_quest_out(q, db, today) for q in routine_quests_raw]
     # 미완료 먼저, 완료는 하단
