@@ -43,7 +43,7 @@ class Need(Base):
 class Quest(Base):
     __tablename__ = "quests"
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    need_id = Column(Uuid(as_uuid=True), ForeignKey("needs.id", ondelete="CASCADE"), nullable=True)  # NULL = self direct
+    need_id = Column(Uuid(as_uuid=True), ForeignKey("needs.id", ondelete="CASCADE"), nullable=False)
     title = Column(String, nullable=False)
     quest_type = Column(SAEnum(QuestType, values_callable=lambda x: [e.value for e in x]), nullable=False)
     routine = Column(JSON, nullable=True)       # {"type":"daily"} | {"type":"weekly","days":[0,2]} | {"type":"monthly","dates":[1,15]}
@@ -93,6 +93,17 @@ class OneTimeCompletion(Base):
     completed_at = Column(DateTime, default=datetime.utcnow)
 
     subtask = relationship("Subtask", back_populates="one_time_completion")
+
+
+class DailyQuestCompletion(Base):
+    """서브태스크 없는 DAILY 퀘스트의 오늘 완료 여부를 추적한다."""
+    __tablename__ = "daily_quest_completions"
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    quest_id = Column(Uuid(as_uuid=True), ForeignKey("quests.id", ondelete="CASCADE"), nullable=False)
+    completed_date = Column(Date, nullable=False)
+    completed_at = Column(DateTime, default=datetime.utcnow)
+
+    quest = relationship("Quest", backref="daily_quest_completions")
 
 
 class IntimacyLog(Base):

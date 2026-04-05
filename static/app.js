@@ -113,32 +113,20 @@ function renderNPCSectionItem(item) {
     : '<span style="color:var(--muted);font-size:10px">— 니즈 없음 —</span>';
   return `
     <div style="margin-bottom:10px;background:var(--bg3);border:1px solid var(--border);border-radius:3px">
-      <div onclick="toggleNPCSection('npc-expand-${npc.id}')"
-           style="display:flex;align-items:center;gap:12px;padding:10px 12px;cursor:pointer">
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 12px">
         ${renderSprite(npc.sprite, npc.color)}
         <div style="flex:1">
-          <div style="display:flex;justify-content:space-between;margin-bottom:2px">
+          <div style="display:flex;justify-content:space-between">
             <span style="color:var(--yellow)">${npc.name}</span>
             <span style="color:var(--muted);font-size:10px">♥ ${npc.intimacy_total}</span>
           </div>
-          <span style="color:var(--muted);font-size:10px" id="npc-toggle-label-${npc.id}">▶ 펼치기</span>
         </div>
       </div>
-      <div id="npc-expand-${npc.id}" style="display:none;padding:0 12px 10px;border-top:1px solid var(--border)">
+      <div style="padding:0 12px 10px;border-top:1px solid var(--border)">
         ${needsHtml}
       </div>
     </div>
   `;
-}
-
-function toggleNPCSection(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const isOpen = el.style.display !== 'none';
-  el.style.display = isOpen ? 'none' : 'block';
-  const npcId = id.replace('npc-expand-', '');
-  const label = document.getElementById('npc-toggle-label-' + npcId);
-  if (label) label.textContent = isOpen ? '▶ 펼치기' : '▼ 접기';
 }
 
 function findQuestInDashboard(questId) {

@@ -62,7 +62,7 @@ class SubtaskOut(BaseModel):
 
 
 class QuestCreate(BaseModel):
-    need_id: Optional[UUID] = None
+    need_id: UUID
     title: str
     quest_type: QuestType
     routine: Optional[RoutineConfig] = None
@@ -71,7 +71,7 @@ class QuestCreate(BaseModel):
 
 class QuestOut(BaseModel):
     id: UUID
-    need_id: Optional[UUID]
+    need_id: UUID
     title: str
     quest_type: QuestType
     routine: Optional[dict]

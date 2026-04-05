@@ -25,14 +25,10 @@ def _enrich_quest(quest: models.Quest, db: Session, today: date) -> schemas.Ques
 
 
 @router.get("", response_model=list[schemas.QuestOut])
-def list_quests(need_id: str = None, db: Session = Depends(get_db)):
+def list_quests(need_id: str, db: Session = Depends(get_db)):
     today = date.today()
-    q = db.query(models.Quest)
-    if need_id:
-        q = q.filter(models.Quest.need_id == need_id)
-    else:
-        q = q.filter(models.Quest.need_id.is_(None))
-    return [_enrich_quest(quest, db, today) for quest in q.all()]
+    quests = db.query(models.Quest).filter(models.Quest.need_id == need_id).all()
+    return [_enrich_quest(quest, db, today) for quest in quests]
 
 
 @router.post("", response_model=schemas.QuestOut, status_code=201)

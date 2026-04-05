@@ -36,10 +36,17 @@ def is_subtask_done_today(db: Session, subtask: models.Subtask, today: date) -> 
     return subtask.one_time_completion is not None
 
 
+def is_quest_done_today(db: Session, quest: models.Quest, today: date) -> bool:
+    """서브태스크 없는 DAILY 퀘스트가 오늘 완료됐는지 확인한다."""
+    return db.query(models.DailyQuestCompletion).filter_by(
+        quest_id=quest.id, completed_date=today
+    ).first() is not None
+
+
 def is_quest_all_done_today(db: Session, quest: models.Quest, today: date) -> bool:
-    """퀘스트의 모든 서브태스크가 오늘 완료됐는지 확인한다. 서브태스크가 없으면 False."""
+    """퀘스트의 모든 서브태스크가 오늘 완료됐는지 확인한다. 서브태스크 없으면 quest 레벨 완료 여부 확인."""
     if not quest.subtasks:
-        return False
+        return is_quest_done_today(db, quest, today)
     return all(is_subtask_done_today(db, st, today) for st in quest.subtasks)
 
 
@@ -90,13 +97,19 @@ def complete_quest(db: Session, quest_id: str, today: date = None) -> dict:
     if quest.is_archived:
         return {"quest_done": False, "level_up": None}
 
-    # 서브태스크 모두 완료 처리
-    for subtask in quest.subtasks:
-        if not is_subtask_done_today(db, subtask, today):
-            if quest.quest_type == models.QuestType.DAILY:
-                db.add(models.DailyCompletion(subtask_id=subtask.id, completed_date=today))
-            else:
-                db.add(models.OneTimeCompletion(subtask_id=subtask.id))
+    # 서브태스크 없는 DAILY 퀘스트: 오늘 이미 완료됐으면 중단
+    if not quest.subtasks and quest.quest_type == models.QuestType.DAILY:
+        if is_quest_done_today(db, quest, today):
+            return {"quest_done": False, "level_up": None}
+        db.add(models.DailyQuestCompletion(quest_id=quest.id, completed_date=today))
+    else:
+        # 서브태스크 모두 완료 처리
+        for subtask in quest.subtasks:
+            if not is_subtask_done_today(db, subtask, today):
+                if quest.quest_type == models.QuestType.DAILY:
+                    db.add(models.DailyCompletion(subtask_id=subtask.id, completed_date=today))
+                else:
+                    db.add(models.OneTimeCompletion(subtask_id=subtask.id))
 
     db.flush()
 
