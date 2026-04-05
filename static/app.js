@@ -88,20 +88,20 @@ function renderNeedWithQuests(nwq) {
         const isDone = q.is_all_done_today;
         return `
           <div onclick="openQuestModal('${q.id}')"
-               style="display:flex;align-items:center;gap:8px;padding:5px 10px;margin-bottom:4px;
+               style="display:flex;align-items:center;gap:8px;padding:4px 8px;margin-bottom:3px;
                       background:var(--bg2);border:1px solid var(--border);border-radius:2px;cursor:pointer;
                       ${isDone ? 'opacity:0.4;' : ''}">
-            <span style="color:var(--muted);font-size:10px">[${progress}]</span>
-            <span style="flex:1;${isDone ? 'text-decoration:line-through;' : ''}">${q.title}</span>
-            ${isDone ? '<span style="color:var(--green);font-size:10px">✓</span>' : '<span style="color:var(--muted)">›</span>'}
+            <span style="color:var(--muted);font-size:10px;white-space:nowrap">[${progress}]</span>
+            <span style="flex:1;font-size:11px;${isDone ? 'text-decoration:line-through;color:var(--muted);' : 'color:var(--text);'}">${q.title}</span>
+            ${isDone ? '<span style="color:var(--green);font-size:10px">✓</span>' : '<span style="color:var(--muted);font-size:10px">›</span>'}
           </div>
         `;
       }).join('')
     : '<span style="color:var(--muted);font-size:10px;padding-left:10px">— 퀘스트 없음 —</span>';
   return `
     <div style="margin-bottom:10px">
-      <div style="color:var(--muted);font-size:10px;margin-bottom:4px;padding-left:2px">"${need.title}"</div>
-      <div style="padding-left:8px">${questsHtml}</div>
+      <div style="color:var(--blue);font-size:12px;font-weight:bold;margin-bottom:5px;padding-left:2px;letter-spacing:0.5px">${need.title}</div>
+      <div style="padding-left:10px">${questsHtml}</div>
     </div>
   `;
 }
