@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LOVE QUEST</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="app">
+
+  <nav class="navbar">
+    <span class="navbar-brand">♛ LOVE QUEST</span>
+    <div class="navbar-links">
+      <a onclick="showPage('dashboard')" id="nav-dashboard" class="active">DASHBOARD</a>
+      <a onclick="showPage('quests')" id="nav-quests">QUESTS</a>
+      <a onclick="showPage('npcs')" id="nav-npcs">NPC</a>
+      <a onclick="showPage('rewards')" id="nav-rewards">REWARDS</a>
+    </div>
+  </nav>
+
+  <!-- 대시보드 -->
+  <div id="page-dashboard" class="page active">
+    <div class="grid-2" style="margin-bottom:12px">
+      <div class="card" id="today-card">
+        <div class="card-title">TODAY</div>
+        <div id="today-list"></div>
+      </div>
+      <div class="card" id="npc-card">
+        <div class="card-title">NPC</div>
+        <div id="npc-list"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">HAPPINESS LEVEL</div>
+      <div id="happiness-display"></div>
+    </div>
+  </div>
+
+  <!-- 퀘스트 보드 -->
+  <div id="page-quests" class="page">
+    <div class="section-header">
+      <span class="section-title">QUEST BOARD</span>
+      <button class="btn btn-sm btn-primary" onclick="openAddQuestModal()">+ 퀘스트 추가</button>
+    </div>
+    <div class="tabs" id="quest-tabs"></div>
+    <div id="quest-content"></div>
+  </div>
+
+  <!-- NPC 관리 -->
+  <div id="page-npcs" class="page">
+    <div class="section-header">
+      <span class="section-title">NPC 관리</span>
+      <button class="btn btn-sm btn-primary" onclick="openAddNPCModal()">+ NPC 추가</button>
+    </div>
+    <div id="npc-detail-list"></div>
+  </div>
+
+  <!-- 보상 설정 -->
+  <div id="page-rewards" class="page">
+    <div class="section-header">
+      <span class="section-title">레벨업 보상</span>
+      <button class="btn btn-sm btn-primary" onclick="openAddRewardModal()">+ 보상 추가</button>
+    </div>
+    <div id="rewards-list"></div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- NPC 추가 모달 -->
+<div class="modal-overlay" id="modal-npc">
+  <div class="modal">
+    <h2>NPC 추가</h2>
+    <div class="form-row">
+      <label class="form-label">이름</label>
+      <input class="input" id="npc-name" placeholder="엄마">
+    </div>
+    <div class="form-row">
+      <label class="form-label">관계</label>
+      <input class="input" id="npc-relationship" placeholder="가족">
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-primary" onclick="submitNPC()">추가</button>
+      <button class="btn" onclick="closeModal('modal-npc')">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- 퀘스트 추가 모달 -->
+<div class="modal-overlay" id="modal-quest">
+  <div class="modal">
+    <h2>퀘스트 추가</h2>
+    <div class="form-row">
+      <label class="form-label">제목</label>
+      <input class="input" id="quest-title" placeholder="주 1회 전화하기">
+    </div>
+    <div class="form-row">
+      <label class="form-label">타입</label>
+      <select class="input" id="quest-type" onchange="toggleRoutine()">
+        <option value="daily">반복 (daily)</option>
+        <option value="one_time">일회성 (one-time)</option>
+      </select>
+    </div>
+    <div id="routine-section" class="form-row">
+      <label class="form-label">루틴</label>
+      <select class="input" id="routine-type" onchange="toggleRoutineDetail()">
+        <option value="daily">매일</option>
+        <option value="weekly">매주 특정 요일</option>
+        <option value="monthly">매월 특정 날짜</option>
+      </select>
+      <div id="routine-days" style="display:none;margin-top:6px">
+        <label class="form-label">요일 선택 (복수 가능)</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <label><input type="checkbox" value="0"> 월</label>
+          <label><input type="checkbox" value="1"> 화</label>
+          <label><input type="checkbox" value="2"> 수</label>
+          <label><input type="checkbox" value="3"> 목</label>
+          <label><input type="checkbox" value="4"> 금</label>
+          <label><input type="checkbox" value="5"> 토</label>
+          <label><input type="checkbox" value="6"> 일</label>
+        </div>
+      </div>
+      <div id="routine-dates" style="display:none;margin-top:6px">
+        <label class="form-label">날짜 입력 (쉼표 구분, 예: 1,15)</label>
+        <input class="input" id="routine-dates-input" placeholder="1,15">
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">친밀도 보상</label>
+      <input class="input" id="quest-reward" type="number" value="10">
+    </div>
+    <input type="hidden" id="quest-need-id">
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-primary" onclick="submitQuest()">추가</button>
+      <button class="btn" onclick="closeModal('modal-quest')">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- 보상 추가 모달 -->
+<div class="modal-overlay" id="modal-reward">
+  <div class="modal">
+    <h2>레벨업 보상 설정</h2>
+    <div class="form-row">
+      <label class="form-label">레벨</label>
+      <input class="input" id="reward-level" type="number" placeholder="5">
+    </div>
+    <div class="form-row">
+      <label class="form-label">보상 내용</label>
+      <input class="input" id="reward-message" placeholder="좋아하는 카페에서 케이크 먹기">
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-primary" onclick="submitReward()">저장</button>
+      <button class="btn" onclick="closeModal('modal-reward')">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- 레벨업 팝업 -->
+<div class="modal-overlay" id="modal-levelup">
+  <div class="modal levelup-popup">
+    <h2>🎉 LEVEL UP!</h2>
+    <div id="levelup-message" style="color:var(--text);margin:16px 0"></div>
+    <div id="levelup-reward" style="color:var(--yellow);margin-bottom:16px"></div>
+    <button class="btn btn-primary" id="btn-claim-reward" onclick="claimReward()">보상 받기</button>
+    <button class="btn" style="margin-left:8px" onclick="closeModal('modal-levelup')">닫기</button>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
