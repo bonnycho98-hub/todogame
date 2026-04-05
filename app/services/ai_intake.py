@@ -2,10 +2,18 @@ import json
 import google.generativeai as genai
 from app.config import GEMINI_API_KEY
 
-genai.configure(api_key=GEMINI_API_KEY)
-_model = genai.GenerativeModel("gemini-2.0-flash")
+_model = None
 
-_SCHEMA = '{"type": "quest 또는 need", "npc_id": "UUID문자열 또는 null", "title": "제목", "subtasks": ["항목1", "항목2"], "quest_type": "one_time 또는 daily"}'
+
+def _get_model():
+    global _model
+    if _model is None:
+        genai.configure(api_key=GEMINI_API_KEY)
+        _model = genai.GenerativeModel("gemini-2.0-flash")
+    return _model
+
+
+_SCHEMA ='{"type": "quest 또는 need", "npc_id": "UUID문자열 또는 null", "title": "제목", "subtasks": ["항목1", "항목2"], "quest_type": "one_time 또는 daily"}'
 
 _CRITERIA = """판단 기준:
 - need: 바람/욕구/관계적 필요 (예: "엄마가 보고싶다")
@@ -62,7 +70,7 @@ JSON만 응답하세요. 마크다운 코드블록 없이 순수 JSON만.
 
 응답 형식: {_SCHEMA}"""
 
-    response = _model.generate_content(prompt)
+    response = _get_model().generate_content(prompt)
     raw = response.text.strip()
 
     # 마크다운 코드블록 제거
@@ -90,9 +98,11 @@ JSON만 응답하세요. 마크다운 코드블록 없이 순수 JSON만.
 
 def save_intake(db, result: dict) -> None:
     """parse_intake 결과를 DB에 저장한다."""
+    import uuid as _uuid
     from app import models
 
-    npc_id = result.get("npc_id")
+    raw_npc_id = result.get("npc_id")
+    npc_id = _uuid.UUID(raw_npc_id) if raw_npc_id else None
 
     if result["type"] == "need":
         need = models.Need(npc_id=npc_id, title=result["title"])
@@ -109,10 +119,13 @@ def save_intake(db, result: dict) -> None:
     else:
         need_id = None
 
+    qt = result.get("quest_type", "one_time")
+    if qt not in ("one_time", "daily"):
+        qt = "one_time"
     quest = models.Quest(
         need_id=need_id,
         title=result["title"],
-        quest_type=result["quest_type"],
+        quest_type=qt,
         intimacy_reward=10,
     )
     db.add(quest)

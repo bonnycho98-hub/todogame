@@ -57,7 +57,7 @@ def test_parse_strips_markdown_codeblock():
 
 def test_parse_invalid_json_raises_value_error():
     with _mock_gemini("이건 JSON이 아닙니다"):
-        with pytest.raises((ValueError, Exception)):
+        with pytest.raises(ValueError):
             parse_intake("뭔가 입력", [])
 
 
@@ -67,3 +67,63 @@ def test_parse_need_subtasks_always_empty():
     with _mock_gemini(response):
         result = parse_intake("운동하고싶어", [])
     assert result["subtasks"] == []
+
+
+# ── save_intake 테스트 ──────────────────────────────────────────
+
+def test_save_intake_need(db):
+    """need 타입은 Need 레코드 하나만 생성한다."""
+    from app import models
+    result = {"type": "need", "npc_id": None, "title": "운동하고싶어", "subtasks": [], "quest_type": None}
+    from app.services.ai_intake import save_intake
+    save_intake(db, result)
+    need = db.query(models.Need).filter_by(title="운동하고싶어").first()
+    assert need is not None
+    assert need.npc_id is None
+
+
+def test_save_intake_quest_without_npc(db):
+    """quest + npc_id 없음 → Quest(need_id=None) + Subtask 생성."""
+    from app import models
+    result = {
+        "type": "quest",
+        "npc_id": None,
+        "title": "물 마시기",
+        "subtasks": ["아침", "저녁"],
+        "quest_type": "daily",
+    }
+    from app.services.ai_intake import save_intake
+    save_intake(db, result)
+    quest = db.query(models.Quest).filter_by(title="물 마시기").first()
+    assert quest is not None
+    assert quest.need_id is None
+    assert len(quest.subtasks) == 2
+
+
+def test_save_intake_quest_with_npc(db):
+    """quest + npc_id 있음 → Need 자동 생성 후 Quest(need_id=...) 생성."""
+    import json
+    from app import models
+    from app.services.sprite import generate_sprite
+    sprite = generate_sprite()
+    npc = models.NPC(name="테스트NPC", relation_type="기타",
+                     sprite=json.dumps(sprite), color=sprite["color"])
+    db.add(npc)
+    db.commit()
+    db.refresh(npc)
+
+    result = {
+        "type": "quest",
+        "npc_id": str(npc.id),
+        "title": "선물 보내기",
+        "subtasks": ["구매", "포장"],
+        "quest_type": "one_time",
+    }
+    from app.services.ai_intake import save_intake
+    save_intake(db, result)
+
+    quest = db.query(models.Quest).filter_by(title="선물 보내기").first()
+    assert quest is not None
+    assert quest.need_id is not None
+    need = db.get(models.Need, quest.need_id)
+    assert need.npc_id == npc.id
