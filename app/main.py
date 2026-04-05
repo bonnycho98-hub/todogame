@@ -53,14 +53,14 @@ async def telegram_webhook(request: Request):
 def _start_scheduler():
     from apscheduler.schedulers.asyncio import AsyncIOScheduler
     from app.config import BRIEFING_HOUR, BRIEFING_MINUTE, TELEGRAM_CHAT_ID
-    from app.database import SessionLocal
+    from app.database import get_session_local
     from app.telegram.formatter import format_briefing
     from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
     scheduler = AsyncIOScheduler()
 
     async def send_daily_brief():
-        db = SessionLocal()
+        db = get_session_local()()
         try:
             text, button_rows = format_briefing(db)
             keyboard = InlineKeyboardMarkup(
