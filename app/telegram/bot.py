@@ -1,3 +1,5 @@
+import logging
+
 from telegram import Update
 from telegram.ext import (
     Application, CommandHandler, CallbackQueryHandler,
@@ -45,7 +47,6 @@ def get_bot_app() -> Application:
             )
             _app.add_handler(conv_handler)
         else:
-            import logging
             logging.warning("GEMINI_API_KEY not set — AI intake handler disabled")
 
     return _app
