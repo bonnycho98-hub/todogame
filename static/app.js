@@ -68,20 +68,19 @@ async function loadDashboard() {
   } else {
     todayEl.innerHTML = data.today_quests.map(q => {
       const doneCount = q.subtasks.filter(s => s.is_done_today).length;
+      const total = q.subtasks.length;
+      const progress = total > 0 ? `[${doneCount}/${total}]` : '[–]';
+      const hasProgress = doneCount > 0 && doneCount < total;
+      const borderStyle = hasProgress ? 'border-color:var(--red)' : '';
+      const typeLabel = q.quest_type === 'daily' ? 'DAILY' : 'QUEST';
       return `
-        <div style="margin-bottom:10px">
-          <div style="color:var(--text);margin-bottom:4px">
-            ${q.quest_type === 'daily' ? '◆' : '◇'} ${q.title}
-            <span style="color:var(--muted);font-size:10px">${doneCount}/${q.subtasks.length}</span>
-          </div>
-          ${q.subtasks.map(st => `
-            <div class="check-item${st.is_done_today ? ' done' : ''}">
-              <input type="checkbox" ${st.is_done_today ? 'checked' : ''}
-                onchange="completeSubtask('${st.id}', this)"
-                ${st.is_done_today ? 'disabled' : ''}>
-              <label>${st.title}</label>
-            </div>
-          `).join('')}
+        <div onclick="openQuestModal('${q.id}')"
+             style="display:flex;align-items:center;gap:10px;padding:7px 10px;margin-bottom:6px;
+                    background:var(--bg3);border:1px solid var(--border);border-radius:3px;cursor:pointer;${borderStyle}">
+          <span style="color:var(--muted);font-size:10px;white-space:nowrap">${progress}</span>
+          <span style="flex:1">${q.title}</span>
+          <span style="color:var(--muted);font-size:10px">${typeLabel}</span>
+          <span style="color:var(--muted)">›</span>
         </div>
       `;
     }).join('');
@@ -313,6 +312,51 @@ async function claimReward() {
   await api('POST', `/rewards/${state.pendingRewardId}/claim`);
   state.pendingRewardId = null;
   closeModal('modal-levelup');
+  await loadDashboard();
+}
+
+// ── 퀘스트 상세 모달 ─────────────────────────────────────────────
+function openQuestModal(questId) {
+  const quest = state.dashboard && state.dashboard.today_quests.find(q => q.id === questId);
+  if (!quest) return;
+
+  const typeLabel = quest.quest_type === 'daily' ? 'DAILY QUEST' : 'QUEST';
+  const subtasksHtml = quest.subtasks.length
+    ? quest.subtasks.map(st => `
+        <div class="check-item${st.is_done_today ? ' done' : ''}" style="padding:4px 0">
+          <input type="checkbox" ${st.is_done_today ? 'checked disabled' : ''}
+            onchange="completeSubtaskFromModal('${st.id}', '${questId}', this)">
+          <label>${st.title}</label>
+        </div>
+      `).join('')
+    : '<span style="color:var(--muted);font-size:11px">서브태스크 없음</span>';
+
+  document.getElementById('quest-detail-type').textContent = typeLabel;
+  document.getElementById('quest-detail-title').textContent = quest.title;
+  document.getElementById('quest-detail-subtasks').innerHTML = subtasksHtml;
+  document.getElementById('btn-complete-quest-modal').onclick = () => completeQuestFromModal(questId);
+  document.getElementById('modal-quest-detail').classList.add('open');
+}
+
+async function completeSubtaskFromModal(subtaskId, questId, checkbox) {
+  try {
+    const result = await api('POST', `/subtasks/${subtaskId}/complete`);
+    if (result.quest_done) {
+      closeModal('modal-quest-detail');
+      await loadDashboard();
+    } else {
+      checkbox.disabled = true;
+      checkbox.closest('.check-item').classList.add('done');
+    }
+  } catch (e) {
+    checkbox.checked = false;
+    alert(e.message);
+  }
+}
+
+async function completeQuestFromModal(questId) {
+  const result = await api('POST', `/quests/${questId}/complete`);
+  closeModal('modal-quest-detail');
   await loadDashboard();
 }
 

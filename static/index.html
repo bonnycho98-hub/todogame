@@ -156,6 +156,21 @@
   </div>
 </div>
 
+<!-- 퀘스트 상세 모달 -->
+<div class="modal-overlay" id="modal-quest-detail">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+      <div>
+        <div id="quest-detail-type" style="color:var(--muted);font-size:10px;letter-spacing:1px;margin-bottom:3px"></div>
+        <h2 id="quest-detail-title" style="color:var(--yellow)"></h2>
+      </div>
+      <button class="btn btn-sm" onclick="closeModal('modal-quest-detail')">[ X ]</button>
+    </div>
+    <div id="quest-detail-subtasks" style="margin-bottom:16px"></div>
+    <button class="btn btn-primary" id="btn-complete-quest-modal" style="width:100%">[ 퀘스트 전체 완료 ]</button>
+  </div>
+</div>
+
 <!-- 레벨업 팝업 -->
 <div class="modal-overlay" id="modal-levelup">
   <div class="modal levelup-popup">
