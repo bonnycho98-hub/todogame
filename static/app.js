@@ -355,9 +355,14 @@ async function completeSubtaskFromModal(subtaskId, questId, checkbox) {
 }
 
 async function completeQuestFromModal(questId) {
-  const result = await api('POST', `/quests/${questId}/complete`);
-  closeModal('modal-quest-detail');
-  await loadDashboard();
+  try {
+    const result = await api('POST', `/quests/${questId}/complete`);
+    closeModal('modal-quest-detail');
+    if (result.level_up) alert(`🎊 LEVEL UP! lv.${result.level_up}`);
+    await loadDashboard();
+  } catch (e) {
+    alert(e.message);
+  }
 }
 
 // ── 모달 헬퍼 ─────────────────────────────────────────────
