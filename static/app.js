@@ -88,15 +88,32 @@ async function loadDashboard() {
 
   // NPC 목록
   const npcEl = document.getElementById('npc-list');
-  npcEl.innerHTML = data.npcs.map(npc => `
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-      ${renderSprite(npc.sprite, npc.color)}
-      <div>
-        <div style="color:var(--text)">${npc.name}</div>
-        <div style="color:var(--muted);font-size:10px">친밀도 ${npc.intimacy_total}</div>
+  npcEl.innerHTML = data.npcs.map(npc => {
+    const needsHtml = npc.needs && npc.needs.length
+      ? npc.needs.map(n => `
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
+            <span style="color:var(--muted);font-size:10px">▷</span>
+            <span style="flex:1;font-size:11px">"${n.title}"</span>
+            <button class="btn btn-sm" style="border-color:var(--green);color:var(--green);white-space:nowrap"
+              onclick="completeNeed('${n.id}')">완료</button>
+          </div>
+        `).join('')
+      : '<span style="color:var(--muted);font-size:10px">— 니즈 없음 —</span>';
+    return `
+      <div style="margin-bottom:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:3px">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          ${renderSprite(npc.sprite, npc.color)}
+          <div style="flex:1">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+              <span style="color:var(--yellow)">${npc.name}</span>
+              <span style="color:var(--muted);font-size:10px">♥ ${npc.intimacy_total}</span>
+            </div>
+            ${needsHtml}
+          </div>
+        </div>
       </div>
-    </div>
-  `).join('') || '<span style="color:var(--muted)">NPC 없음</span>';
+    `;
+  }).join('') || '<span style="color:var(--muted)">NPC 없음</span>';
 
   // 행복 레벨
   document.getElementById('happiness-display').innerHTML = renderHappiness(data.happiness);
@@ -359,6 +376,16 @@ async function completeQuestFromModal(questId) {
     const result = await api('POST', `/quests/${questId}/complete`);
     closeModal('modal-quest-detail');
     if (result.level_up) alert(`🎊 LEVEL UP! lv.${result.level_up}`);
+    await loadDashboard();
+  } catch (e) {
+    alert(e.message);
+  }
+}
+
+async function completeNeed(id) {
+  if (!confirm('니즈를 완료 처리할까요?')) return;
+  try {
+    await api('POST', `/needs/${id}/complete`);
     await loadDashboard();
   } catch (e) {
     alert(e.message);
