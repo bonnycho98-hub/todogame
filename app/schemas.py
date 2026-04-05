@@ -1,7 +1,8 @@
+from __future__ import annotations
 from pydantic import BaseModel
 from uuid import UUID
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from app.models import QuestType
 
 
@@ -22,7 +23,8 @@ class NPCOut(BaseModel):
     created_at: datetime
     intimacy_total: int = 0
 
-    model_config = {"from_attributes": True}
+    class Config:
+        orm_mode = True
 
 
 # ── Need ──────────────────────────────────────────────────────
@@ -37,14 +39,15 @@ class NeedOut(BaseModel):
     title: str
     created_at: datetime
 
-    model_config = {"from_attributes": True}
+    class Config:
+        orm_mode = True
 
 
 # ── Quest ──────────────────────────────────────────────────────
 class RoutineConfig(BaseModel):
-    type: str                           # "daily" | "weekly" | "monthly"
-    days: Optional[list[int]] = None    # weekly: 0=Mon..6=Sun
-    dates: Optional[list[int]] = None   # monthly: 1..31
+    type: str
+    days: Optional[List[int]] = None
+    dates: Optional[List[int]] = None
 
 
 class SubtaskOut(BaseModel):
@@ -53,7 +56,8 @@ class SubtaskOut(BaseModel):
     order: int
     is_done_today: bool = False
 
-    model_config = {"from_attributes": True}
+    class Config:
+        orm_mode = True
 
 
 class QuestCreate(BaseModel):
@@ -72,9 +76,10 @@ class QuestOut(BaseModel):
     routine: Optional[dict]
     intimacy_reward: int
     is_archived: bool
-    subtasks: list[SubtaskOut] = []
+    subtasks: List[SubtaskOut] = []
 
-    model_config = {"from_attributes": True}
+    class Config:
+        orm_mode = True
 
 
 # ── Subtask ──────────────────────────────────────────────────────
@@ -103,7 +108,8 @@ class LevelRewardOut(BaseModel):
     is_claimed: bool
     claimed_at: Optional[datetime]
 
-    model_config = {"from_attributes": True}
+    class Config:
+        orm_mode = True
 
 
 # ── Dashboard ──────────────────────────────────────────────────────
@@ -124,7 +130,7 @@ class NPCSummary(BaseModel):
 
 
 class DashboardOut(BaseModel):
-    today_quests: list[QuestOut]
-    npcs: list[NPCSummary]
+    today_quests: List[QuestOut]
+    npcs: List[NPCSummary]
     happiness: HappinessOut
     pending_level_reward: Optional[LevelRewardOut]
