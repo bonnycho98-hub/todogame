@@ -194,7 +194,6 @@ def test_completed_routine_quests_sorted_to_bottom(client):
     res = client.get("/api/dashboard")
     routine_quests = res.json()["routine_quests"]
 
-    ids = [q["id"] for q in routine_quests]
     idx_undone = next((i for i, q in enumerate(routine_quests) if q["id"] == q_undone["id"]), None)
     idx_done = next((i for i, q in enumerate(routine_quests) if q["id"] == q_done["id"]), None)
 

@@ -4,13 +4,12 @@ from sqlalchemy.orm import Session
 from datetime import date
 from app.database import get_db
 from app import models, schemas
-from app.services.quest import is_subtask_done_today
+from app.services.quest import is_subtask_done_today, is_quest_all_done_today
 
 router = APIRouter(prefix="/api/quests", tags=["quests"])
 
 
 def _enrich_quest(quest: models.Quest, db: Session, today: date) -> schemas.QuestOut:
-    from app.services.quest import is_quest_all_done_today
     out = schemas.QuestOut.from_orm(quest)
     out.subtasks = [
         schemas.SubtaskOut(
