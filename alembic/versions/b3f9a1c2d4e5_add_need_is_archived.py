@@ -16,7 +16,7 @@ depends_on = None
 def upgrade():
     op.add_column(
         'needs',
-        sa.Column('is_archived', sa.Boolean(), nullable=False, server_default='false')
+        sa.Column('is_archived', sa.Boolean(), nullable=False, server_default=sa.text('false'))
     )
 
 
