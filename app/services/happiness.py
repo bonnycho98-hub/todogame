@@ -1,6 +1,6 @@
 import math
 
-POINTS_PER_LEVEL = 100
+POINTS_PER_LEVEL = 30
 
 
 def calculate_happiness(self_total: int, others_totals: list) -> dict:
