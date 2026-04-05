@@ -180,6 +180,8 @@ function renderNeedAccordion(need, quests) {
         <span>${need.title}</span>
         <span style="color:var(--muted);font-size:10px;margin-left:auto">${quests.length}개</span>
         <button class="btn btn-sm" style="margin-left:8px" onclick="event.stopPropagation();openAddQuestModal('${need.id}')">+ 퀘스트</button>
+        <button class="btn btn-sm" style="margin-left:4px" onclick="event.stopPropagation();editNeed('${need.id}','${need.title.replace(/'/g, "\\'")}')">✎</button>
+        <button class="btn btn-sm" style="margin-left:4px;color:var(--red);border-color:var(--red)" onclick="event.stopPropagation();deleteNeed('${need.id}')">✕</button>
       </div>
       <div class="accordion-body" id="need-${need.id}">
         ${quests.map(q => renderQuestAccordion(q)).join('')}
@@ -199,13 +201,17 @@ function renderQuestAccordion(q) {
         <span style="color:var(--muted);font-size:10px;margin-left:8px">[${routineLabel}]</span>
         <span style="color:var(--muted);font-size:10px;margin-left:auto">${doneCount}/${q.subtasks.length}</span>
         <button class="btn btn-sm" style="margin-left:8px" onclick="event.stopPropagation();openAddSubtaskModal('${q.id}')">+ 항목</button>
+        <button class="btn btn-sm" style="margin-left:4px" onclick="event.stopPropagation();editQuest('${q.id}','${q.title.replace(/'/g, "\\'")}',${q.intimacy_reward})">✎</button>
+        <button class="btn btn-sm" style="margin-left:4px;color:var(--red);border-color:var(--red)" onclick="event.stopPropagation();deleteQuest('${q.id}')">✕</button>
       </div>
       <div class="accordion-body" id="quest-${q.id}">
         ${q.subtasks.map(st => `
-          <div class="check-item${st.is_done_today ? ' done' : ''}" style="padding-left:12px">
+          <div class="check-item${st.is_done_today ? ' done' : ''}" style="padding-left:12px;display:flex;align-items:center;gap:6px">
             <input type="checkbox" ${st.is_done_today ? 'checked disabled' : ''}
               onchange="completeSubtaskInBoard('${st.id}', this)">
-            <label>${st.title}</label>
+            <label style="flex:1">${st.title}</label>
+            <button class="btn btn-sm" style="padding:0 4px;font-size:10px" onclick="editSubtask('${st.id}','${st.title.replace(/'/g, "\\'")}')">✎</button>
+            <button class="btn btn-sm" style="padding:0 4px;font-size:10px;color:var(--red);border-color:var(--red)" onclick="deleteSubtask('${st.id}')">✕</button>
           </div>
         `).join('')}
       </div>
@@ -333,6 +339,47 @@ function openAddNeedModal(npcId) {
   const title = prompt('니즈 내용 입력:');
   if (!title) return;
   api('POST', '/needs', { npc_id: npcId || null, title }).then(() => renderQuestContent());
+}
+
+async function editNeed(id, currentTitle) {
+  const title = prompt('니즈 수정:', currentTitle);
+  if (!title || title === currentTitle) return;
+  await api('PATCH', `/needs/${id}`, { title });
+  await renderQuestContent();
+}
+
+async function deleteNeed(id) {
+  if (!confirm('니즈를 삭제할까요? 관련 퀘스트도 모두 삭제됩니다.')) return;
+  await api('DELETE', `/needs/${id}`);
+  await renderQuestContent();
+}
+
+async function editQuest(id, currentTitle, currentReward) {
+  const title = prompt('퀘스트 제목 수정:', currentTitle);
+  if (!title) return;
+  const rewardStr = prompt('친밀도 보상:', currentReward);
+  const intimacy_reward = parseInt(rewardStr) || currentReward;
+  await api('PATCH', `/quests/${id}`, { title, intimacy_reward });
+  await renderQuestContent();
+}
+
+async function deleteQuest(id) {
+  if (!confirm('퀘스트를 삭제할까요?')) return;
+  await api('DELETE', `/quests/${id}`);
+  await renderQuestContent();
+}
+
+async function editSubtask(id, currentTitle) {
+  const title = prompt('항목 수정:', currentTitle);
+  if (!title || title === currentTitle) return;
+  await api('PATCH', `/subtasks/${id}`, { title });
+  await renderQuestContent();
+}
+
+async function deleteSubtask(id) {
+  if (!confirm('항목을 삭제할까요?')) return;
+  await api('DELETE', `/subtasks/${id}`);
+  await renderQuestContent();
 }
 
 function openAddQuestModal(needId) {

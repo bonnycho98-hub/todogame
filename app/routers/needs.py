@@ -26,6 +26,17 @@ def create_need(body: schemas.NeedCreate, db: Session = Depends(get_db)):
     return need
 
 
+@router.patch("/{need_id}", response_model=schemas.NeedOut)
+def update_need(need_id: UUID, body: schemas.NeedUpdate, db: Session = Depends(get_db)):
+    need = db.get(models.Need, need_id)
+    if not need:
+        raise HTTPException(404)
+    need.title = body.title
+    db.commit()
+    db.refresh(need)
+    return need
+
+
 @router.delete("/{need_id}", status_code=204)
 def delete_need(need_id: UUID, db: Session = Depends(get_db)):
     need = db.get(models.Need, need_id)

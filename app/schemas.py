@@ -82,11 +82,28 @@ class QuestOut(BaseModel):
         orm_mode = True
 
 
+# ── Need Update ──────────────────────────────────────────────────────
+class NeedUpdate(BaseModel):
+    title: str
+
+
+# ── Quest Update ──────────────────────────────────────────────────────
+class QuestUpdate(BaseModel):
+    title: Optional[str] = None
+    quest_type: Optional[QuestType] = None
+    routine: Optional[RoutineConfig] = None
+    intimacy_reward: Optional[int] = None
+
+
 # ── Subtask ──────────────────────────────────────────────────────
 class SubtaskCreate(BaseModel):
     quest_id: UUID
     title: str
     order: int = 0
+
+
+class SubtaskUpdate(BaseModel):
+    title: str
 
 
 class CompleteSubtaskOut(BaseModel):

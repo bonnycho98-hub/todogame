@@ -49,6 +49,24 @@ def create_quest(body: schemas.QuestCreate, db: Session = Depends(get_db)):
     return _enrich_quest(quest, db, date.today())
 
 
+@router.patch("/{quest_id}", response_model=schemas.QuestOut)
+def update_quest(quest_id: UUID, body: schemas.QuestUpdate, db: Session = Depends(get_db)):
+    quest = db.get(models.Quest, quest_id)
+    if not quest:
+        raise HTTPException(404)
+    if body.title is not None:
+        quest.title = body.title
+    if body.quest_type is not None:
+        quest.quest_type = body.quest_type
+    if body.routine is not None:
+        quest.routine = body.routine.dict()
+    if body.intimacy_reward is not None:
+        quest.intimacy_reward = body.intimacy_reward
+    db.commit()
+    db.refresh(quest)
+    return _enrich_quest(quest, db, date.today())
+
+
 @router.delete("/{quest_id}", status_code=204)
 def delete_quest(quest_id: UUID, db: Session = Depends(get_db)):
     quest = db.get(models.Quest, quest_id)

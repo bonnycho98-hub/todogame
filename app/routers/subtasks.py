@@ -32,6 +32,17 @@ def complete(subtask_id: UUID, db: Session = Depends(get_db)):
     return result
 
 
+@router.patch("/{subtask_id}", response_model=schemas.SubtaskOut)
+def update_subtask(subtask_id: UUID, body: schemas.SubtaskUpdate, db: Session = Depends(get_db)):
+    subtask = db.get(models.Subtask, subtask_id)
+    if not subtask:
+        raise HTTPException(404)
+    subtask.title = body.title
+    db.commit()
+    db.refresh(subtask)
+    return schemas.SubtaskOut(id=subtask.id, title=subtask.title, order=subtask.order, is_done_today=False)
+
+
 @router.delete("/{subtask_id}", status_code=204)
 def delete_subtask(subtask_id: UUID, db: Session = Depends(get_db)):
     subtask = db.get(models.Subtask, subtask_id)
