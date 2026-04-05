@@ -56,64 +56,133 @@ function renderHappiness(h) {
   `;
 }
 
+// ── 대시보드 렌더 헬퍼 ─────────────────────────────────────────────
+function renderRoutineQuest(q) {
+  const doneCount = q.subtasks.filter(s => s.is_done_today).length;
+  const total = q.subtasks.length;
+  const progress = total > 0 ? `[${doneCount}/${total}]` : '[–]';
+  const isDone = q.is_all_done_today;
+  const inProgress = !isDone && doneCount > 0;
+  const borderStyle = inProgress ? 'border-color:var(--red);' : '';
+  const doneStyle = isDone ? 'opacity:0.4;' : '';
+  const textStyle = isDone ? 'text-decoration:line-through;' : '';
+  return `
+    <div onclick="openQuestModal('${q.id}')"
+         style="display:flex;align-items:center;gap:10px;padding:7px 10px;margin-bottom:6px;
+                background:var(--bg3);border:1px solid var(--border);border-radius:3px;cursor:pointer;${borderStyle}${doneStyle}">
+      <span style="color:var(--muted);font-size:10px;white-space:nowrap">${progress}</span>
+      <span style="flex:1;${textStyle}">${q.title}</span>
+      ${isDone ? '<span style="color:var(--green);font-size:10px">✓</span>' : '<span style="color:var(--muted)">›</span>'}
+    </div>
+  `;
+}
+
+function renderNeedWithQuests(nwq) {
+  const need = nwq.need;
+  const quests = nwq.quests;
+  const questsHtml = quests.length
+    ? quests.map(q => {
+        const doneCount = q.subtasks.filter(s => s.is_done_today).length;
+        const total = q.subtasks.length;
+        const progress = total > 0 ? `${doneCount}/${total}` : '–';
+        const isDone = q.is_all_done_today;
+        return `
+          <div onclick="openQuestModal('${q.id}')"
+               style="display:flex;align-items:center;gap:8px;padding:5px 10px;margin-bottom:4px;
+                      background:var(--bg2);border:1px solid var(--border);border-radius:2px;cursor:pointer;
+                      ${isDone ? 'opacity:0.4;' : ''}">
+            <span style="color:var(--muted);font-size:10px">[${progress}]</span>
+            <span style="flex:1;${isDone ? 'text-decoration:line-through;' : ''}">${q.title}</span>
+            ${isDone ? '<span style="color:var(--green);font-size:10px">✓</span>' : '<span style="color:var(--muted)">›</span>'}
+          </div>
+        `;
+      }).join('')
+    : '<span style="color:var(--muted);font-size:10px;padding-left:10px">— 퀘스트 없음 —</span>';
+  return `
+    <div style="margin-bottom:10px">
+      <div style="color:var(--muted);font-size:10px;margin-bottom:4px;padding-left:2px">"${need.title}"</div>
+      <div style="padding-left:8px">${questsHtml}</div>
+    </div>
+  `;
+}
+
+function renderNPCSectionItem(item) {
+  const npc = item.npc;
+  const needsHtml = item.needs.length
+    ? item.needs.map(nwq => renderNeedWithQuests(nwq)).join('')
+    : '<span style="color:var(--muted);font-size:10px">— 니즈 없음 —</span>';
+  return `
+    <div style="margin-bottom:10px;background:var(--bg3);border:1px solid var(--border);border-radius:3px">
+      <div onclick="toggleNPCSection('npc-expand-${npc.id}')"
+           style="display:flex;align-items:center;gap:12px;padding:10px 12px;cursor:pointer">
+        ${renderSprite(npc.sprite, npc.color)}
+        <div style="flex:1">
+          <div style="display:flex;justify-content:space-between;margin-bottom:2px">
+            <span style="color:var(--yellow)">${npc.name}</span>
+            <span style="color:var(--muted);font-size:10px">♥ ${npc.intimacy_total}</span>
+          </div>
+          <span style="color:var(--muted);font-size:10px" id="npc-toggle-label-${npc.id}">▶ 펼치기</span>
+        </div>
+      </div>
+      <div id="npc-expand-${npc.id}" style="display:none;padding:0 12px 10px;border-top:1px solid var(--border)">
+        ${needsHtml}
+      </div>
+    </div>
+  `;
+}
+
+function toggleNPCSection(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  const npcId = id.replace('npc-expand-', '');
+  const label = document.getElementById('npc-toggle-label-' + npcId);
+  if (label) label.textContent = isOpen ? '▶ 펼치기' : '▼ 접기';
+}
+
+function findQuestInDashboard(questId) {
+  if (!state.dashboard) return null;
+  for (const q of state.dashboard.routine_quests) {
+    if (q.id === questId) return q;
+  }
+  for (const nwq of state.dashboard.self_section.needs) {
+    for (const q of nwq.quests) {
+      if (q.id === questId) return q;
+    }
+  }
+  for (const item of state.dashboard.npc_section) {
+    for (const nwq of item.needs) {
+      for (const q of nwq.quests) {
+        if (q.id === questId) return q;
+      }
+    }
+  }
+  return null;
+}
+
 // ── 대시보드 ─────────────────────────────────────────────
 async function loadDashboard() {
   const data = await api('GET', '/dashboard');
   state.dashboard = data;
 
-  // 오늘의 퀘스트
-  const todayEl = document.getElementById('today-list');
-  if (!data.today_quests.length) {
-    todayEl.innerHTML = '<span style="color:var(--muted)">오늘 퀘스트 없음</span>';
-  } else {
-    todayEl.innerHTML = data.today_quests.map(q => {
-      const doneCount = q.subtasks.filter(s => s.is_done_today).length;
-      const total = q.subtasks.length;
-      const progress = total > 0 ? `[${doneCount}/${total}]` : '[–]';
-      const hasProgress = doneCount > 0 && doneCount < total;
-      const borderStyle = hasProgress ? 'border-color:var(--red)' : '';
-      const typeLabel = q.quest_type === 'daily' ? 'DAILY' : 'QUEST';
-      return `
-        <div onclick="openQuestModal('${q.id}')"
-             style="display:flex;align-items:center;gap:10px;padding:7px 10px;margin-bottom:6px;
-                    background:var(--bg3);border:1px solid var(--border);border-radius:3px;cursor:pointer;${borderStyle}">
-          <span style="color:var(--muted);font-size:10px;white-space:nowrap">${progress}</span>
-          <span style="flex:1">${q.title}</span>
-          <span style="color:var(--muted);font-size:10px">${typeLabel}</span>
-          <span style="color:var(--muted)">›</span>
-        </div>
-      `;
-    }).join('');
-  }
+  // 오늘의 루틴
+  const routineEl = document.getElementById('routine-list');
+  routineEl.innerHTML = data.routine_quests.length
+    ? data.routine_quests.map(q => renderRoutineQuest(q)).join('')
+    : '<span style="color:var(--muted)">오늘 루틴 없음</span>';
 
-  // NPC 목록
+  // 나를 사랑하기
+  const selfEl = document.getElementById('self-section');
+  selfEl.innerHTML = data.self_section.needs.length
+    ? data.self_section.needs.map(nwq => renderNeedWithQuests(nwq)).join('')
+    : '<span style="color:var(--muted)">등록된 니즈 없음</span>';
+
+  // 타인을 사랑하기
   const npcEl = document.getElementById('npc-list');
-  npcEl.innerHTML = data.npcs.map(npc => {
-    const needsHtml = npc.needs && npc.needs.length
-      ? npc.needs.map(n => `
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
-            <span style="color:var(--muted);font-size:10px">▷</span>
-            <span style="flex:1;font-size:11px">"${n.title}"</span>
-            <button class="btn btn-sm" style="border-color:var(--green);color:var(--green);white-space:nowrap"
-              onclick="completeNeed('${n.id}')">완료</button>
-          </div>
-        `).join('')
-      : '<span style="color:var(--muted);font-size:10px">— 니즈 없음 —</span>';
-    return `
-      <div style="margin-bottom:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:3px">
-        <div style="display:flex;align-items:flex-start;gap:12px">
-          ${renderSprite(npc.sprite, npc.color)}
-          <div style="flex:1">
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-              <span style="color:var(--yellow)">${npc.name}</span>
-              <span style="color:var(--muted);font-size:10px">♥ ${npc.intimacy_total}</span>
-            </div>
-            ${needsHtml}
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('') || '<span style="color:var(--muted)">NPC 없음</span>';
+  npcEl.innerHTML = data.npc_section.length
+    ? data.npc_section.map(item => renderNPCSectionItem(item)).join('')
+    : '<span style="color:var(--muted)">NPC 없음</span>';
 
   // 행복 레벨
   document.getElementById('happiness-display').innerHTML = renderHappiness(data.happiness);
@@ -334,7 +403,7 @@ async function claimReward() {
 
 // ── 퀘스트 상세 모달 ─────────────────────────────────────────────
 function openQuestModal(questId) {
-  const quest = state.dashboard && state.dashboard.today_quests.find(q => q.id === questId);
+  const quest = findQuestInDashboard(questId);
   if (!quest) return;
 
   const typeLabel = quest.quest_type === 'daily' ? 'DAILY QUEST' : 'QUEST';
