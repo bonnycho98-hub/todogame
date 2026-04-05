@@ -78,6 +78,7 @@ class QuestOut(BaseModel):
     intimacy_reward: int
     is_archived: bool
     subtasks: List[SubtaskOut] = []
+    is_all_done_today: bool = False  # 프론트에서 완료 시각 상태(취소선/회색) 처리용
 
     class Config:
         orm_mode = True
@@ -152,8 +153,23 @@ class NPCSummary(BaseModel):
     needs: List[NeedOut] = []
 
 
+class NeedWithQuests(BaseModel):
+    need: NeedOut
+    quests: List[QuestOut]
+
+
+class SelfSection(BaseModel):
+    needs: List[NeedWithQuests]
+
+
+class NPCSectionItem(BaseModel):
+    npc: NPCSummary
+    needs: List[NeedWithQuests]
+
+
 class DashboardOut(BaseModel):
-    today_quests: List[QuestOut]
-    npcs: List[NPCSummary]
+    routine_quests: List[QuestOut]
+    self_section: SelfSection
+    npc_section: List[NPCSectionItem]
     happiness: HappinessOut
     pending_level_reward: Optional[LevelRewardOut]
