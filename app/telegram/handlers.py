@@ -1,9 +1,13 @@
+import logging
+
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, Message
 from telegram.ext import ContextTypes, ConversationHandler
 from app.database import get_session_local
 from app.telegram.formatter import format_briefing, format_status
 from app.services.quest import complete_subtask
 from app import models
+
+logger = logging.getLogger(__name__)
 
 # ConversationHandler 상태
 AWAITING_CONFIRM = 1
@@ -71,15 +75,15 @@ async def handle_free_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
     try:
         result = parse_intake(text, npcs)
-    except Exception:
+    except Exception as exc:
+        logger.exception("parse_intake failed: %s", exc)
         await processing_msg.edit_text("처리 중 오류가 났어요. 다시 입력해주세요.")
         return ConversationHandler.END
 
     context.user_data["current_result"] = result
     context.user_data["original_text"] = text
 
-    result_msg = await _send_result(update, result)
-    context.user_data["result_message_id"] = result_msg.message_id
+    await _send_result(update, result)
     await processing_msg.delete()
     return AWAITING_CONFIRM
 
@@ -91,6 +95,10 @@ async def handle_correction(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     correction = update.message.text
     previous_result = context.user_data.get("current_result")
     original_text = context.user_data.get("original_text", "")
+
+    if previous_result is None:
+        await update.message.reply_text("이전 결과가 없어요. 새로 입력해주세요.")
+        return ConversationHandler.END
 
     processing_msg = await update.message.reply_text("⏳ 수정 중...")
 
@@ -107,13 +115,13 @@ async def handle_correction(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             previous_result=previous_result,
             correction=correction,
         )
-    except Exception:
+    except Exception as exc:
+        logger.exception("parse_intake correction failed: %s", exc)
         await processing_msg.edit_text("수정 중 오류가 났어요. 다시 수정 지시를 보내주세요.")
         return AWAITING_CONFIRM
 
     context.user_data["current_result"] = result
-    result_msg = await _send_result(update, result)
-    context.user_data["result_message_id"] = result_msg.message_id
+    await _send_result(update, result)
     await processing_msg.delete()
     return AWAITING_CONFIRM
 
@@ -126,6 +134,10 @@ async def handle_save(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     await query.answer()
 
     result = context.user_data.get("current_result")
+    if result is None:
+        await query.edit_message_text("저장할 내용이 없어요. 다시 시도해주세요.")
+        return ConversationHandler.END
+
     db = get_session_local()()
     try:
         save_intake(db, result)
