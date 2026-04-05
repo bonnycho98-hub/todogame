@@ -36,6 +36,13 @@ def is_subtask_done_today(db: Session, subtask: models.Subtask, today: date) -> 
     return subtask.one_time_completion is not None
 
 
+def is_quest_all_done_today(db: Session, quest: models.Quest, today: date) -> bool:
+    """퀘스트의 모든 서브태스크가 오늘 완료됐는지 확인한다. 서브태스크가 없으면 False."""
+    if not quest.subtasks:
+        return False
+    return all(is_subtask_done_today(db, st, today) for st in quest.subtasks)
+
+
 def _get_intimacy_total(db: Session, npc_id) -> int:
     result = db.query(func.sum(models.IntimacyLog.delta)).filter(
         models.IntimacyLog.npc_id == npc_id
