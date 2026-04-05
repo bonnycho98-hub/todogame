@@ -80,3 +80,11 @@ def test_dashboard_npc_includes_needs(client):
     assert npc_data is not None
     assert "needs" in npc_data
     assert any(n["title"] == "대시보드용 니즈" for n in npc_data["needs"])
+
+
+def test_double_complete_need_returns_409(client):
+    npc = client.post("/api/npcs", json={"name": "409테스트NPC", "relation_type": "기타"}).json()
+    need = client.post("/api/needs", json={"npc_id": npc["id"], "title": "중복완료 니즈"}).json()
+    client.post(f"/api/needs/{need['id']}/complete")
+    res = client.post(f"/api/needs/{need['id']}/complete")
+    assert res.status_code == 409
