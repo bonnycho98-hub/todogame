@@ -10,6 +10,7 @@ router = APIRouter(prefix="/api/quests", tags=["quests"])
 
 
 def _enrich_quest(quest: models.Quest, db: Session, today: date) -> schemas.QuestOut:
+    from app.services.quest import is_quest_all_done_today
     out = schemas.QuestOut.from_orm(quest)
     out.subtasks = [
         schemas.SubtaskOut(
@@ -20,6 +21,7 @@ def _enrich_quest(quest: models.Quest, db: Session, today: date) -> schemas.Ques
         )
         for st in quest.subtasks
     ]
+    out.is_all_done_today = is_quest_all_done_today(db, quest, today)
     return out
 
 
