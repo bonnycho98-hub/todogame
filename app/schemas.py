@@ -149,6 +149,7 @@ class NPCSummary(BaseModel):
     sprite: str
     color: str
     intimacy_total: int
+    needs: List[NeedOut] = []
 
 
 class DashboardOut(BaseModel):

@@ -66,3 +66,17 @@ def test_complete_need_archives_it(client):
     # 목록에서 제외됐는지 확인
     needs_list = client.get(f"/api/needs?npc_id={npc['id']}").json()
     assert not any(n["id"] == need["id"] for n in needs_list)
+
+
+def test_dashboard_npc_includes_needs(client):
+    npc = client.post("/api/npcs", json={"name": "대시보드테스트NPC", "relation_type": "기타"}).json()
+    client.post("/api/needs", json={"npc_id": npc["id"], "title": "대시보드용 니즈"})
+
+    res = client.get("/api/dashboard")
+    assert res.status_code == 200
+    dashboard = res.json()
+
+    npc_data = next((n for n in dashboard["npcs"] if n["name"] == "대시보드테스트NPC"), None)
+    assert npc_data is not None
+    assert "needs" in npc_data
+    assert any(n["title"] == "대시보드용 니즈" for n in npc_data["needs"])

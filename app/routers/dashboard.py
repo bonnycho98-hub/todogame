@@ -28,17 +28,21 @@ def get_dashboard(db: Session = Depends(get_db)):
             ]
             today_quests.append(out)
 
-    # NPC 목록 + 친밀도
+    # NPC 목록 + 친밀도 + 활성 needs
     npcs = db.query(models.NPC).all()
     npc_summaries = []
     others_totals = []
     for npc in npcs:
         total = _get_intimacy_total(db, npc.id)
         others_totals.append(total)
+        active_needs = db.query(models.Need).filter_by(
+            npc_id=npc.id, is_archived=False
+        ).order_by(models.Need.created_at).all()
         npc_summaries.append(schemas.NPCSummary(
             id=npc.id, name=npc.name,
             sprite=npc.sprite, color=npc.color,
             intimacy_total=total,
+            needs=[schemas.NeedOut.from_orm(n) for n in active_needs],
         ))
 
     # 행복 레벨
