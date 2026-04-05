@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session, selectinload
-from datetime import date
+from datetime import date, datetime
 from app.database import get_db
 from app import models, schemas
 from app.services.happiness import calculate_happiness
@@ -37,7 +37,7 @@ def get_dashboard(db: Session = Depends(get_db)):
         others_totals.append(total)
         active_needs = sorted(
             [n for n in npc.needs if not n.is_archived],
-            key=lambda n: n.created_at,
+            key=lambda n: n.created_at or datetime.min,
         )
         npc_summaries.append(schemas.NPCSummary(
             id=npc.id, name=npc.name,
