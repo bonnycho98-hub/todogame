@@ -47,3 +47,9 @@ def test_level_reward_create_and_claim(client):
 
     res3 = client.post(f"/api/rewards/{reward_id}/claim")
     assert res3.status_code == 400
+
+
+def test_need_is_not_archived_by_default(client):
+    npc = client.post("/api/npcs", json={"name": "테스트NPC", "relation_type": "기타"}).json()
+    need = client.post("/api/needs", json={"npc_id": npc["id"], "title": "테스트 니즈"}).json()
+    assert need["is_archived"] is False

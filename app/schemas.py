@@ -37,6 +37,7 @@ class NeedOut(BaseModel):
     id: UUID
     npc_id: Optional[UUID]
     title: str
+    is_archived: bool = False
     created_at: datetime
 
     class Config:

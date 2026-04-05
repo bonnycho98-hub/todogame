@@ -31,8 +31,9 @@ class NPC(Base):
 class Need(Base):
     __tablename__ = "needs"
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    npc_id = Column(Uuid(as_uuid=True), ForeignKey("npcs.id", ondelete="CASCADE"), nullable=True)  # NULL = self
+    npc_id = Column(Uuid(as_uuid=True), ForeignKey("npcs.id", ondelete="CASCADE"), nullable=True)
     title = Column(Text, nullable=False)
+    is_archived = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     npc = relationship("NPC", back_populates="needs")
