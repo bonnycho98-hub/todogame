@@ -53,3 +53,16 @@ def test_need_is_not_archived_by_default(client):
     npc = client.post("/api/npcs", json={"name": "테스트NPC", "relation_type": "기타"}).json()
     need = client.post("/api/needs", json={"npc_id": npc["id"], "title": "테스트 니즈"}).json()
     assert need["is_archived"] is False
+
+
+def test_complete_need_archives_it(client):
+    npc = client.post("/api/npcs", json={"name": "니즈완료테스트NPC", "relation_type": "기타"}).json()
+    need = client.post("/api/needs", json={"npc_id": npc["id"], "title": "완료할 니즈"}).json()
+
+    res = client.post(f"/api/needs/{need['id']}/complete")
+    assert res.status_code == 200
+    assert res.json()["done"] is True
+
+    # 목록에서 제외됐는지 확인
+    needs_list = client.get(f"/api/needs?npc_id={npc['id']}").json()
+    assert not any(n["id"] == need["id"] for n in needs_list)

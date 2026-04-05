@@ -88,6 +88,10 @@ class NeedUpdate(BaseModel):
     title: str
 
 
+class NeedCompleteOut(BaseModel):
+    done: bool
+
+
 # ── Quest Update ──────────────────────────────────────────────────────
 class QuestUpdate(BaseModel):
     title: Optional[str] = None
