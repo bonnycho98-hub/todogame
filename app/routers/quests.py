@@ -67,6 +67,15 @@ def update_quest(quest_id: UUID, body: schemas.QuestUpdate, db: Session = Depend
     return _enrich_quest(quest, db, date.today())
 
 
+@router.post("/{quest_id}/complete")
+def complete_quest(quest_id: UUID, db: Session = Depends(get_db)):
+    from app.services.quest import complete_quest as svc_complete
+    try:
+        return svc_complete(db, quest_id)
+    except ValueError as e:
+        raise HTTPException(404, str(e))
+
+
 @router.delete("/{quest_id}", status_code=204)
 def delete_quest(quest_id: UUID, db: Session = Depends(get_db)):
     quest = db.get(models.Quest, quest_id)

@@ -201,6 +201,7 @@ function renderQuestAccordion(q) {
         <span style="color:var(--muted);font-size:10px;margin-left:8px">[${routineLabel}]</span>
         <span style="color:var(--muted);font-size:10px;margin-left:auto">${doneCount}/${q.subtasks.length}</span>
         <button class="btn btn-sm" style="margin-left:8px" onclick="event.stopPropagation();openAddSubtaskModal('${q.id}')">+ 항목</button>
+        <button class="btn btn-sm" style="margin-left:4px;color:var(--green, #00b894);border-color:var(--green, #00b894)" onclick="event.stopPropagation();completeQuest('${q.id}')">✔ 완료</button>
         <button class="btn btn-sm" style="margin-left:4px" onclick="event.stopPropagation();editQuest('${q.id}','${q.title.replace(/'/g, "\\'")}',${q.intimacy_reward})">✎</button>
         <button class="btn btn-sm" style="margin-left:4px;color:var(--red);border-color:var(--red)" onclick="event.stopPropagation();deleteQuest('${q.id}')">✕</button>
       </div>
@@ -352,6 +353,14 @@ async function deleteNeed(id) {
   if (!confirm('니즈를 삭제할까요? 관련 퀘스트도 모두 삭제됩니다.')) return;
   await api('DELETE', `/needs/${id}`);
   await renderQuestContent();
+}
+
+async function completeQuest(id) {
+  if (!confirm('퀘스트를 완료 처리할까요?')) return;
+  const result = await api('POST', `/quests/${id}/complete`);
+  if (result.level_up) alert(`🎊 LEVEL UP! lv.${result.level_up}`);
+  await renderQuestContent();
+  await loadDashboard();
 }
 
 async function editQuest(id, currentTitle, currentReward) {

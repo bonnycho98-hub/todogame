@@ -70,6 +70,48 @@ def _check_level_up(db: Session, npc_id, reward: int) -> int | None:
     return None
 
 
+def complete_quest(db: Session, quest_id: str, today: date = None) -> dict:
+    """
+    퀘스트를 직접 완료 처리한다. 서브태스크 전부 완료 + 친밀도 보상 지급.
+    반환: {"quest_done": bool, "level_up": int | None}
+    """
+    today = today or date.today()
+    quest = db.get(models.Quest, quest_id)
+    if quest is None:
+        raise ValueError(f"Quest {quest_id} not found")
+
+    if quest.is_archived:
+        return {"quest_done": False, "level_up": None}
+
+    # 서브태스크 모두 완료 처리
+    for subtask in quest.subtasks:
+        if not is_subtask_done_today(db, subtask, today):
+            if quest.quest_type == models.QuestType.DAILY:
+                db.add(models.DailyCompletion(subtask_id=subtask.id, completed_date=today))
+            else:
+                db.add(models.OneTimeCompletion(subtask_id=subtask.id))
+
+    db.flush()
+
+    npc_id = None
+    if quest.need and quest.need.npc_id:
+        npc_id = quest.need.npc_id
+
+    db.add(models.IntimacyLog(
+        npc_id=npc_id,
+        delta=quest.intimacy_reward,
+        reason=f"퀘스트 완료: {quest.title}",
+    ))
+    db.flush()
+
+    if quest.quest_type == models.QuestType.ONE_TIME:
+        quest.is_archived = True
+
+    level_up = _check_level_up(db, npc_id, quest.intimacy_reward)
+    db.commit()
+    return {"quest_done": True, "level_up": level_up}
+
+
 def complete_subtask(db: Session, subtask_id: str, today: date = None) -> dict:
     """
     서브태스크를 완료 처리한다.
