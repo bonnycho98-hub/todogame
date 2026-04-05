@@ -22,7 +22,7 @@ _CRITERIA = """판단 기준:
 - one_time: 일회성 작업
 - npc_id: NPC 목록에서 관련 NPC의 id, 없으면 null
 - subtasks: 퀘스트를 위한 세부 단계들, need이면 반드시 빈 배열
-- need의 title 작성 규칙: NPC가 있으면 그 NPC 캐릭터가 주인공에게 직접 말하는 게임 대사 스타일로 작성 (예: npc=엄마, 입력="엄마가 보고싶다" → "보고 싶었어, 우리 아이. 엄마도 네 생각 많이 했어."). NPC가 없으면 주인공의 내면 목소리가 속삭이는 스타일로 작성 (예: "오늘은 그냥 쉬어도 괜찮아. 충분히 달려왔잖아.")"""
+- need의 title 작성 규칙: NPC가 있으면 그 NPC 캐릭터가 주인공에게 직접 말하는 게임 대사 스타일로 작성 (예: npc=엄마, 입력="엄마가 보고싶다" → "보고 싶었어, 우리 아이. 엄마도 네 생각 많이 했어."). NPC가 없으면 주인공이 자신의 욕구/니즈를 직접 자신의 목소리로 말하는 스타일로 작성 — 감정의 온도에 맞게 열정적일 수도, 잔잔할 수도 있음 (예: 성장 욕구 → "더 성장하고 싶어. 멋진 결과물을 함께 만들고 싶은 사람들 사이에 있고 싶어!", 휴식 욕구 → "지금은 그냥 쉬고 싶어. 충분히 달려왔잖아.")"""
 
 
 def parse_intake(
@@ -126,10 +126,14 @@ def save_intake(db, result: dict) -> None:
     qt = result.get("quest_type", "one_time")
     if qt not in ("one_time", "daily"):
         qt = "one_time"
+    routine = result.get("routine") if qt == "daily" else None
+    if qt == "daily" and routine is None:
+        routine = {"type": "daily"}
     quest = models.Quest(
         need_id=need_id,
         title=result["title"],
         quest_type=qt,
+        routine=routine,
         intimacy_reward=10,
     )
     db.add(quest)
