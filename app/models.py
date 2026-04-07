@@ -20,8 +20,9 @@ class NPC(Base):
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String, nullable=False)
     relation_type = Column(String, nullable=False)
-    sprite = Column(Text, nullable=False)       # JSON: {"lines": [...], "color": "#hex"}
+    sprite = Column(Text, nullable=False)
     color = Column(String(7), nullable=False)
+    location = Column(String, nullable=False, default="home")
     created_at = Column(DateTime, default=datetime.utcnow)
 
     needs = relationship("Need", back_populates="npc", cascade="all, delete-orphan")
