@@ -4,12 +4,15 @@
   --bg2: #0f1923;
   --bg3: #1c2333;
   --border: #2a3344;
+  --dimmer: #111820;
+  --dim: #3a4a5a;
   --red: #e94560;
   --yellow: #ffd32a;
   --blue: #a8dadc;
   --green: #3fb950;
   --text: #cdd9e5;
   --muted: #768390;
+  --purple: #a371f7;
   --font: 'Courier New', Courier, monospace;
 }
 
@@ -23,7 +26,7 @@ body {
   min-height: 100vh;
 }
 
-/* 레이아웃 */
+/* ── 레이아웃 ── */
 .app { display: flex; flex-direction: column; min-height: 100vh; }
 
 .navbar {
@@ -42,17 +45,100 @@ body {
 .page { display: none; padding: 20px; max-width: 900px; margin: 0 auto; width: 100%; }
 .page.active { display: block; }
 
-/* 카드 */
-.card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 14px;
+/* ── 행복 레벨 인라인 바 ── */
+.hp-inline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 16px;
+  font-size: 12px;
+}
+.hp-inline-lv { color: var(--yellow); white-space: nowrap; }
+.hp-inline-track { flex: 1; height: 2px; background: var(--dimmer); }
+.hp-inline-fill { height: 100%; background: var(--yellow); }
+.hp-inline-label { color: var(--dim); font-size: 11px; white-space: nowrap; }
+
+/* ── 섹션 헤더 (구분선) ── */
+.sh {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  color: var(--dim);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding-bottom: 6px;
+  margin-bottom: 2px;
+}
+.sh::after { content: ''; flex: 1; height: 1px; background: var(--dimmer); }
+
+.dash-section { margin-bottom: 16px; }
+
+/* ── 엔티티 (나/NPC 컨테이너) ── */
+.entity { padding: 5px 0 4px; }
+.entity + .entity { border-top: 1px solid var(--dimmer); }
+
+.e-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 3px;
+  font-size: 12px;
+}
+.e-loc { font-size: 11px; }
+.e-sprite { font-size: 13px; color: var(--muted); line-height: 1; }
+.e-name { color: var(--yellow); }
+.e-self-name { color: var(--purple); }
+.e-rel { color: var(--dim); font-size: 11px; }
+.e-intimacy { color: var(--dim); font-size: 11px; margin-left: auto; }
+.e-done-label { color: var(--green); font-size: 11px; margin-left: auto; opacity: 0.6; }
+
+/* ── 니즈/퀘스트 행 ── */
+.n-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0 2px 18px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.n-row:hover .n-title { color: var(--text); }
+
+.ndots { display: flex; gap: 2px; flex-shrink: 0; }
+.nd { width: 6px; height: 6px; background: var(--dimmer); }
+.nd.done { background: var(--green); }
+.nd.act  { background: var(--red); }
+
+.n-title { flex: 1; color: var(--blue); }
+.n-title.done { color: var(--dim); text-decoration: line-through; }
+.n-count { color: var(--dim); font-size: 10px; white-space: nowrap; }
+.n-count.done { color: var(--green); }
+
+/* 루틴 행 */
+.r-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 12px;
+  cursor: pointer;
+}
+.r-row:hover { color: var(--blue); }
+.r-prog { color: var(--dim); font-size: 11px; white-space: nowrap; }
+.r-title { flex: 1; }
+.r-title.done { color: var(--dim); text-decoration: line-through; }
+.r-check { color: var(--green); font-size: 11px; }
+.r-arrow { color: var(--muted); font-size: 11px; }
+.r-arrow.inprog { color: var(--red); }
+
+/* ── 섹션 헤더 (페이지용) ── */
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 12px;
 }
-.card-title { color: var(--yellow); margin-bottom: 10px; font-size: 11px; letter-spacing: 1px; }
+.section-title { color: var(--blue); font-size: 11px; letter-spacing: 1px; }
 
-/* 버튼 */
+/* ── 버튼 ── */
 .btn {
   background: transparent;
   border: 1px solid var(--border);
@@ -68,7 +154,7 @@ body {
 .btn-primary:hover { background: #c73650; }
 .btn-sm { padding: 3px 8px; font-size: 11px; }
 
-/* 인풋 */
+/* ── 인풋 ── */
 .input {
   background: var(--bg3);
   border: 1px solid var(--border);
@@ -81,35 +167,35 @@ body {
 }
 .input:focus { outline: none; border-color: var(--red); }
 
-/* 탭 */
-.tabs { display: flex; gap: 4px; margin-bottom: 14px; flex-wrap: wrap; }
+/* ── 탭 ── */
+.tabs { display: flex; gap: 0; margin-bottom: 14px; flex-wrap: nowrap; overflow-x: auto; border-bottom: 1px solid var(--dimmer); }
 .tab {
-  background: var(--bg3);
-  border: 1px solid var(--border);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
   color: var(--muted);
-  padding: 4px 12px;
+  padding: 6px 12px;
   cursor: pointer;
-  border-radius: 3px;
   font-family: var(--font);
   font-size: 11px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
-.tab.active { background: var(--red); border-color: var(--red); color: #fff; }
+.tab.active { color: var(--text); border-bottom-color: var(--red); }
 .tab:hover:not(.active) { color: var(--text); }
+.tab-sep { width: 1px; background: var(--border); margin: 6px 3px; flex-shrink: 0; }
 
-/* 행복 픽셀 블록 */
-.pixel-blocks { display: flex; gap: 4px; align-items: center; }
-.pixel-block { width: 16px; height: 16px; background: var(--bg3); border: 1px solid var(--border); }
-.pixel-block.filled { background: var(--red); border-color: var(--red); }
-
-/* NPC 스프라이트 */
+/* ── NPC 스프라이트 ── */
 .sprite { white-space: pre; line-height: 1.4; font-size: 12px; }
 
-/* 체크박스 */
+/* ── 체크박스 ── */
 .check-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
 .check-item input[type=checkbox] { accent-color: var(--red); width: 14px; height: 14px; }
 .check-item.done label { color: var(--muted); text-decoration: line-through; }
 
-/* 아코디언 */
+/* ── 아코디언 (퀘스트 보드) ── */
 .accordion-header {
   display: flex; align-items: center; gap: 8px;
   cursor: pointer; padding: 6px 0; color: var(--text);
@@ -119,11 +205,11 @@ body {
 .accordion-body { padding-left: 20px; display: none; }
 .accordion-body.open { display: block; }
 
-/* 친밀도 바 */
-.intimacy-bar { background: var(--bg3); height: 6px; border-radius: 2px; margin: 4px 0; }
+/* ── 친밀도 바 (NPC 관리) ── */
+.intimacy-bar { background: var(--bg3); height: 4px; border-radius: 2px; margin: 4px 0; }
 .intimacy-fill { background: var(--red); height: 100%; border-radius: 2px; transition: width .3s; }
 
-/* 모달 */
+/* ── 모달 ── */
 .modal-overlay {
   display: none; position: fixed; inset: 0;
   background: rgba(0,0,0,0.7); z-index: 100;
@@ -136,25 +222,47 @@ body {
 }
 .modal h2 { color: var(--red); margin-bottom: 16px; }
 
-/* 레벨업 팝업 */
-.levelup-popup {
-  border-color: var(--yellow);
-  text-align: center;
-}
+/* ── 레벨업 팝업 ── */
+.levelup-popup { border-color: var(--yellow); text-align: center; }
 .levelup-popup h2 { color: var(--yellow); }
 
-/* 폼 */
+/* ── 폼 ── */
 .form-row { margin-bottom: 10px; }
 .form-label { color: var(--muted); font-size: 11px; letter-spacing: 1px; display: block; margin-bottom: 4px; }
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-/* 그리드 */
+/* 위치 선택 토글 */
+.location-toggle { display: flex; gap: 6px; }
+.location-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 4px 12px;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 12px;
+  border-radius: 3px;
+  flex: 1;
+  text-align: center;
+}
+.location-btn.active { border-color: var(--red); color: var(--text); background: rgba(233,69,96,0.1); }
+
+/* ── NPC 관리 엔티티 행 ── */
+.npc-manage-row {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--dimmer);
+}
+.npc-manage-row:last-child { border-bottom: none; }
+.npc-manage-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
+}
+
+/* ── 그리드 ── */
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
 
-/* 섹션 헤더 */
-.section-header {
+/* ── 보상 행 ── */
+.reward-row {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 10px;
+  padding: 6px 0; border-bottom: 1px solid var(--dimmer);
 }
-.section-title { color: var(--blue); font-size: 11px; letter-spacing: 1px; }
+.reward-row:last-child { border-bottom: none; }
