@@ -395,24 +395,25 @@ async function loadNPCDetail() {
   state.npcs = npcs;
   const el = document.getElementById('npc-detail-list');
   el.innerHTML = npcs.map(npc => {
+    const locIcon = npc.location === 'company' ? '🏢' : '🏠';
     const maxIntimacy = 100;
     const pct = Math.min((npc.intimacy_total / maxIntimacy) * 100, 100);
     return `
-      <div class="card">
-        <div style="display:flex;gap:16px;align-items:flex-start">
-          <div style="text-align:center;min-width:60px">
-            ${renderSprite(npc.sprite, npc.color)}
-            <div style="color:var(--text);margin-top:4px">${npc.name}</div>
-            <div style="color:var(--muted);font-size:10px">${npc.relation_type}</div>
-            <button class="btn btn-sm" style="margin-top:4px" onclick="regenSprite('${npc.id}')">재생성</button>
-          </div>
+      <div class="npc-manage-row">
+        <div class="npc-manage-header">
+          <span style="font-size:12px">${locIcon}</span>
+          ${renderSprite(npc.sprite, npc.color)}
           <div style="flex:1">
-            <div style="color:var(--muted);font-size:10px;letter-spacing:1px;margin-bottom:4px">INTIMACY</div>
-            <div class="intimacy-bar"><div class="intimacy-fill" style="width:${pct}%"></div></div>
-            <div style="color:var(--muted);font-size:10px">${npc.intimacy_total} 누적</div>
-            <button class="btn btn-sm" style="margin-top:8px;color:var(--red);border-color:var(--red)"
-              onclick="deleteNPC('${npc.id}','${npc.name}')">삭제</button>
+            <span style="color:var(--yellow)">${npc.name}</span>
+            <span style="color:var(--dim);font-size:11px;margin-left:6px">${npc.relation_type}</span>
           </div>
+          <button class="btn btn-sm" onclick="regenSprite('${npc.id}')">재생성</button>
+          <button class="btn btn-sm" style="color:var(--red);border-color:var(--red);margin-left:4px"
+            onclick="deleteNPC('${npc.id}','${npc.name}')">삭제</button>
+        </div>
+        <div style="padding-left:20px">
+          <div class="intimacy-bar"><div class="intimacy-fill" style="width:${pct}%"></div></div>
+          <span style="font-size:10px;color:var(--dim)">${npc.intimacy_total} 누적</span>
         </div>
       </div>
     `;
@@ -435,7 +436,7 @@ async function loadRewards() {
   const rewards = await api('GET', '/rewards');
   const el = document.getElementById('rewards-list');
   el.innerHTML = rewards.map(r => `
-    <div class="card" style="display:flex;align-items:center;justify-content:space-between">
+    <div class="reward-row">
       <div>
         <span style="color:var(--yellow)">lv.${r.level}</span>
         <span style="margin-left:12px;color:var(--text)">${r.message}</span>
@@ -524,17 +525,25 @@ function closeModal(id) {
   document.getElementById(id).classList.remove('open');
 }
 
+function selectLocation(loc) {
+  document.getElementById('npc-location').value = loc;
+  document.getElementById('loc-home').classList.toggle('active', loc === 'home');
+  document.getElementById('loc-company').classList.toggle('active', loc === 'company');
+}
+
 function openAddNPCModal() {
   document.getElementById('npc-name').value = '';
   document.getElementById('npc-relationship').value = '';
+  selectLocation('home');
   document.getElementById('modal-npc').classList.add('open');
 }
 
 async function submitNPC() {
   const name = document.getElementById('npc-name').value.trim();
   const rel = document.getElementById('npc-relationship').value.trim();
+  const location = document.getElementById('npc-location').value;
   if (!name) return alert('이름을 입력하세요');
-  await api('POST', '/npcs', { name, relation_type: rel || '기타' });
+  await api('POST', '/npcs', { name, relation_type: rel || '기타', location });
   closeModal('modal-npc');
   await loadNPCDetail();
 }
