@@ -242,12 +242,28 @@ async function loadQuestBoard() {
 
   // 탭 렌더링
   const tabsEl = document.getElementById('quest-tabs');
-  tabsEl.innerHTML = `
-    <div class="tab${state.activeQuestTab === 'self' ? ' active' : ''}" onclick="selectQuestTab('self')">나 자신</div>
-    ${npcs.map(n => `
-      <div class="tab${state.activeQuestTab === n.id ? ' active' : ''}" onclick="selectQuestTab('${n.id}')">${n.name}</div>
-    `).join('')}
-  `;
+
+  // NPC를 location으로 분류
+  const homeNPCs = npcs.filter(n => n.location !== 'company');
+  const companyNPCs = npcs.filter(n => n.location === 'company');
+
+  let tabsHtml = `<div class="tab${state.activeQuestTab === 'self' ? ' active' : ''}" onclick="selectQuestTab('self')">나 자신</div>`;
+
+  if (homeNPCs.length > 0) {
+    tabsHtml += `<div class="tab-sep"></div>`;
+    tabsHtml += homeNPCs.map(n => `
+      <div class="tab${state.activeQuestTab === n.id ? ' active' : ''}" onclick="selectQuestTab('${n.id}')">🏠 ${n.name}</div>
+    `).join('');
+  }
+
+  if (companyNPCs.length > 0) {
+    tabsHtml += `<div class="tab-sep"></div>`;
+    tabsHtml += companyNPCs.map(n => `
+      <div class="tab${state.activeQuestTab === n.id ? ' active' : ''}" onclick="selectQuestTab('${n.id}')">🏢 ${n.name}</div>
+    `).join('');
+  }
+
+  tabsEl.innerHTML = tabsHtml;
 
   await renderQuestContent();
 }
