@@ -41,18 +41,23 @@ function renderSprite(spriteJson, color) {
   } catch { return '<pre class="sprite">(?)</pre>'; }
 }
 
+function renderSpriteInline(spriteJson, color) {
+  try {
+    const data = typeof spriteJson === 'string' ? JSON.parse(spriteJson) : spriteJson;
+    const firstLine = data.lines[0] || '?';
+    return `<span style="color:${color || data.color};font-size:13px">${firstLine}</span>`;
+  } catch { return '<span>?</span>'; }
+}
+
 // ── 행복 레벨 렌더링 ─────────────────────────────────────────────
 function renderHappiness(h) {
-  const blocks = Array.from({ length: h.total_blocks }, (_, i) =>
-    `<div class="pixel-block${i < h.filled_blocks ? ' filled' : ''}"></div>`
-  ).join('');
+  const pct = h.progress * 100;
   return `
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
-      <span style="color:var(--yellow);font-size:20px">lv.${h.level}</span>
-      <div class="pixel-blocks">${blocks}</div>
-      <span style="color:var(--muted);font-size:11px">lv.${h.level + 1}까지 ${Math.round((1 - h.progress) * 100)}%</span>
+    <span class="hp-inline-lv">lv.${h.level}</span>
+    <div class="hp-inline-track">
+      <div class="hp-inline-fill" style="width:${pct}%"></div>
     </div>
-    <div style="color:var(--muted);font-size:10px">score: ${h.score}</div>
+    <span class="hp-inline-label">lv.${h.level + 1}까지 ${Math.round((1 - h.progress) * 100)}%</span>
   `;
 }
 
@@ -62,17 +67,13 @@ function renderRoutineQuest(q) {
   const total = q.subtasks.length;
   const progress = total > 0 ? `[${doneCount}/${total}]` : '[–]';
   const isDone = q.is_all_done_today;
-  const inProgress = !isDone && doneCount > 0;
-  const borderStyle = inProgress ? 'border-color:var(--red);' : '';
-  const doneStyle = isDone ? 'opacity:0.4;' : '';
-  const textStyle = isDone ? 'text-decoration:line-through;' : '';
+  const arrowClass = isDone ? 'r-check' : (doneCount > 0 ? 'r-arrow inprog' : 'r-arrow');
+  const arrowChar = isDone ? '✓' : '›';
   return `
-    <div onclick="openQuestModal('${q.id}')"
-         style="display:flex;align-items:center;gap:10px;padding:7px 10px;margin-bottom:6px;
-                background:var(--bg3);border:1px solid var(--border);border-radius:3px;cursor:pointer;${borderStyle}${doneStyle}">
-      <span style="color:var(--muted);font-size:10px;white-space:nowrap">${progress}</span>
-      <span style="flex:1;${textStyle}">${q.title}</span>
-      ${isDone ? '<span style="color:var(--green);font-size:10px">✓</span>' : '<span style="color:var(--muted)">›</span>'}
+    <div class="r-row" onclick="openQuestModal('${q.id}')">
+      <span class="r-prog">${progress}</span>
+      <span class="r-title${isDone ? ' done' : ''}">${q.title}</span>
+      <span class="${arrowClass}">${arrowChar}</span>
     </div>
   `;
 }
@@ -80,51 +81,85 @@ function renderRoutineQuest(q) {
 function renderNeedWithQuests(nwq) {
   const need = nwq.need;
   const quests = nwq.quests;
-  const questsHtml = quests.length
-    ? quests.map(q => {
-        const doneCount = q.subtasks.filter(s => s.is_done_today).length;
-        const total = q.subtasks.length;
-        const progress = total > 0 ? `${doneCount}/${total}` : '–';
-        const isDone = q.is_all_done_today;
-        return `
-          <div onclick="openQuestModal('${q.id}')"
-               style="display:flex;align-items:center;gap:8px;padding:4px 8px;margin-bottom:3px;
-                      background:var(--bg2);border:1px solid var(--border);border-radius:2px;cursor:pointer;
-                      ${isDone ? 'opacity:0.4;' : ''}">
-            <span style="color:var(--muted);font-size:10px;white-space:nowrap">[${progress}]</span>
-            <span style="flex:1;font-size:11px;${isDone ? 'text-decoration:line-through;color:var(--muted);' : 'color:var(--text);'}">${q.title}</span>
-            ${isDone ? '<span style="color:var(--green);font-size:10px">✓</span>' : '<span style="color:var(--muted);font-size:10px">›</span>'}
-          </div>
-        `;
-      }).join('')
-    : '<span style="color:var(--muted);font-size:10px;padding-left:10px">— 퀘스트 없음 —</span>';
+  const allDone = quests.length > 0 && quests.every(q => q.is_all_done_today);
+
+  const questRows = quests.map(q => {
+    const doneCount = q.subtasks.filter(s => s.is_done_today).length;
+    const total = q.subtasks.length || 1;
+    const isDone = q.is_all_done_today;
+    const dots = Array.from({ length: Math.min(total, 5) }, (_, i) =>
+      `<div class="nd${i < doneCount ? ' done' : (i === doneCount && doneCount < total && doneCount > 0 ? ' act' : '')}"></div>`
+    ).join('');
+    return `
+      <div class="n-row" onclick="openQuestModal('${q.id}')">
+        <div class="ndots">${dots}</div>
+        <span class="n-title${isDone ? ' done' : ''}">${q.title}</span>
+        <span class="n-count${isDone ? ' done' : ''}">${isDone ? '✓' : `${doneCount}/${total}`}</span>
+      </div>
+    `;
+  }).join('');
+
   return `
-    <div style="margin-bottom:10px">
-      <div style="color:var(--blue);font-size:12px;font-weight:bold;margin-bottom:5px;padding-left:2px;letter-spacing:0.5px">${need.title}</div>
-      <div style="padding-left:10px">${questsHtml}</div>
+    <div class="entity">
+      <div class="e-header">
+        <span style="color:var(--purple)">✦</span>
+        <span class="e-self-name">${need.title}</span>
+        ${allDone ? '<span class="e-done-label">✓</span>' : ''}
+      </div>
+      ${questRows}
     </div>
   `;
 }
 
 function renderNPCSectionItem(item) {
   const npc = item.npc;
-  const needsHtml = item.needs.length
-    ? item.needs.map(nwq => renderNeedWithQuests(nwq)).join('')
-    : '<span style="color:var(--muted);font-size:10px">— 니즈 없음 —</span>';
-  return `
-    <div style="margin-bottom:10px;background:var(--bg3);border:1px solid var(--border);border-radius:3px">
-      <div style="display:flex;align-items:center;gap:12px;padding:10px 12px">
-        ${renderSprite(npc.sprite, npc.color)}
-        <div style="flex:1">
-          <div style="display:flex;justify-content:space-between">
-            <span style="color:var(--yellow)">${npc.name}</span>
-            <span style="color:var(--muted);font-size:10px">♥ ${npc.intimacy_total}</span>
-          </div>
+  const locIcon = npc.location === 'company' ? '🏢' : '🏠';
+
+  const allQuests = item.needs.flatMap(nwq => nwq.quests);
+  const allDone = allQuests.length > 0 && allQuests.every(q => q.is_all_done_today);
+
+  if (allDone) {
+    return `
+      <div class="entity" style="opacity:0.45">
+        <div class="e-header">
+          <span class="e-loc">${locIcon}</span>
+          <span class="e-sprite">${renderSpriteInline(npc.sprite, npc.color)}</span>
+          <span class="e-name">${npc.name}</span>
+          <span class="e-rel">${npc.relation_type}</span>
+          <span class="e-done-label">오늘 완료 ✓</span>
         </div>
       </div>
-      <div style="padding:0 12px 10px;border-top:1px solid var(--border)">
-        ${needsHtml}
+    `;
+  }
+
+  const needRows = item.needs.flatMap(nwq =>
+    nwq.quests.map(q => {
+      const doneCount = q.subtasks.filter(s => s.is_done_today).length;
+      const total = q.subtasks.length || 1;
+      const isDone = q.is_all_done_today;
+      const dots = Array.from({ length: Math.min(total, 5) }, (_, i) =>
+        `<div class="nd${i < doneCount ? ' done' : (i === doneCount && doneCount > 0 && !isDone ? ' act' : '')}"></div>`
+      ).join('');
+      return `
+        <div class="n-row" onclick="openQuestModal('${q.id}')">
+          <div class="ndots">${dots}</div>
+          <span class="n-title${isDone ? ' done' : ''}">${q.title}</span>
+          <span class="n-count${isDone ? ' done' : ''}">${isDone ? '✓' : `${doneCount}/${total}`}</span>
+        </div>
+      `;
+    })
+  ).join('');
+
+  return `
+    <div class="entity">
+      <div class="e-header">
+        <span class="e-loc">${locIcon}</span>
+        <span class="e-sprite">${renderSpriteInline(npc.sprite, npc.color)}</span>
+        <span class="e-name">${npc.name}</span>
+        <span class="e-rel">${npc.relation_type}</span>
+        <span class="e-intimacy">♥ ${npc.intimacy_total}</span>
       </div>
+      ${needRows || '<span style="color:var(--dim);font-size:11px;padding-left:18px">— 퀘스트 없음 —</span>'}
     </div>
   `;
 }
