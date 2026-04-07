@@ -105,6 +105,7 @@ def get_dashboard(db: Session = Depends(get_db)):
             name=npc.name,
             sprite=npc.sprite,
             color=npc.color,
+            location=npc.location,
             intimacy_total=total,
             needs=[schemas.NeedOut.from_orm(n) for n in active_needs],
         )

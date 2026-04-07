@@ -12,6 +12,7 @@ class NPCCreate(BaseModel):
     relation_type: str
     sprite: Optional[str] = None
     color: Optional[str] = None
+    location: str = "home"
 
 
 class NPCOut(BaseModel):
@@ -20,6 +21,7 @@ class NPCOut(BaseModel):
     relation_type: str
     sprite: str
     color: str
+    location: str
     created_at: datetime
     intimacy_total: int = 0
 
@@ -149,6 +151,7 @@ class NPCSummary(BaseModel):
     name: str
     sprite: str
     color: str
+    location: str
     intimacy_total: int
     needs: List[NeedOut] = []
 

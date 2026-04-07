@@ -200,3 +200,23 @@ def test_completed_routine_quests_sorted_to_bottom(client):
     assert idx_undone is not None
     assert idx_done is not None
     assert idx_undone < idx_done  # 미완료가 완료보다 앞에 와야 함
+
+
+def test_npc_location_field(client):
+    # 기본값은 home
+    res = client.post("/api/npcs", json={"name": "엄마", "relation_type": "가족"})
+    assert res.status_code == 201
+    assert res.json()["location"] == "home"
+
+    # company 지정 가능
+    res2 = client.post("/api/npcs", json={
+        "name": "김팀장", "relation_type": "직장", "location": "company"
+    })
+    assert res2.status_code == 201
+    assert res2.json()["location"] == "company"
+
+    # 목록에도 location 포함
+    res3 = client.get("/api/npcs")
+    names_locations = {n["name"]: n["location"] for n in res3.json()}
+    assert names_locations.get("엄마") == "home"
+    assert names_locations.get("김팀장") == "company"

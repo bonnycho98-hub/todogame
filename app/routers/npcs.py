@@ -39,6 +39,7 @@ def create_npc(body: schemas.NPCCreate, db: Session = Depends(get_db)):
         relation_type=body.relation_type,
         sprite=sprite_json,
         color=color,
+        location=body.location,
     )
     db.add(npc)
     db.commit()
