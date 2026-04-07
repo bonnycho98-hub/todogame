@@ -21,21 +21,21 @@
 
   <!-- 대시보드 -->
   <div id="page-dashboard" class="page active">
-    <div class="card" style="margin-bottom:12px">
-      <div class="card-title">오늘의 루틴</div>
+    <div id="happiness-display" class="hp-inline"></div>
+
+    <div class="dash-section">
+      <div class="sh">루틴</div>
       <div id="routine-list"></div>
     </div>
-    <div class="card" style="margin-bottom:12px">
-      <div class="card-title">나를 사랑하기</div>
+
+    <div class="dash-section">
+      <div class="sh">나를 사랑하기</div>
       <div id="self-section"></div>
     </div>
-    <div class="card" style="margin-bottom:12px">
-      <div class="card-title">타인을 사랑하기</div>
+
+    <div class="dash-section">
+      <div class="sh">타인을 사랑하기</div>
       <div id="npc-list"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">HAPPINESS LEVEL</div>
-      <div id="happiness-display"></div>
     </div>
   </div>
 
@@ -80,6 +80,14 @@
     <div class="form-row">
       <label class="form-label">관계</label>
       <input class="input" id="npc-relationship" placeholder="가족">
+    </div>
+    <div class="form-row">
+      <label class="form-label">위치</label>
+      <div class="location-toggle">
+        <button class="location-btn active" id="loc-home" onclick="selectLocation('home')">🏠 집</button>
+        <button class="location-btn" id="loc-company" onclick="selectLocation('company')">🏢 회사</button>
+      </div>
+      <input type="hidden" id="npc-location" value="home">
     </div>
     <div style="display:flex;gap:8px;margin-top:16px">
       <button class="btn btn-primary" onclick="submitNPC()">추가</button>
