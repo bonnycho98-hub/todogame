@@ -354,10 +354,12 @@ function renderNeedAccordion(need, quests) {
       <div class="accordion-header" onclick="toggleAccordion('need-${need.id}')">
         <span class="accordion-arrow" id="arrow-need-${need.id}">▶</span>
         <span class="accordion-title">${need.title}</span>
-        <span class="accordion-count">${quests.length}개</span>
-        <button class="btn btn-sm" onclick="event.stopPropagation();openAddQuestModal('${need.id}')">+ 퀘스트</button>
-        <button class="btn btn-sm" onclick="event.stopPropagation();editNeed('${need.id}','${need.title.replace(/'/g, "\\'")}')">✎</button>
-        <button class="btn btn-sm" style="color:var(--red);border-color:var(--red)" onclick="event.stopPropagation();deleteNeed('${need.id}')">✕</button>
+        <div class="accordion-actions" onclick="event.stopPropagation()">
+          <span class="accordion-count">${quests.length}개</span>
+          <button class="btn btn-sm" onclick="openAddQuestModal('${need.id}')">+ 퀘스트</button>
+          <button class="btn btn-sm" onclick="editNeed('${need.id}','${need.title.replace(/'/g, "\\'")}')">✎</button>
+          <button class="btn btn-sm" style="color:var(--red);border-color:var(--red)" onclick="deleteNeed('${need.id}')">✕</button>
+        </div>
       </div>
       <div class="accordion-body" id="need-${need.id}">
         ${quests.map(q => renderQuestAccordion(q)).join('')}
@@ -373,12 +375,14 @@ function renderQuestAccordion(q) {
     <div style="margin-left:16px;margin-bottom:6px;border-left:1px solid var(--border);padding-left:12px">
       <div class="accordion-header" onclick="toggleAccordion('quest-${q.id}')">
         <span class="accordion-arrow" id="arrow-quest-${q.id}">▶</span>
-        <span class="accordion-title">${q.title}</span>
-        <span class="accordion-count">${routineLabel ? `[${routineLabel}] ` : ''}${doneCount}/${q.subtasks.length}</span>
-        <button class="btn btn-sm" onclick="event.stopPropagation();openAddSubtaskModal('${q.id}')">+ 항목</button>
-        <button class="btn btn-sm" style="color:var(--green);border-color:var(--green)" onclick="event.stopPropagation();completeQuest('${q.id}')">✔ 완료</button>
-        <button class="btn btn-sm" onclick="event.stopPropagation();editQuest('${q.id}','${q.title.replace(/'/g, "\\'")}',${q.intimacy_reward})">✎</button>
-        <button class="btn btn-sm" style="color:var(--red);border-color:var(--red)" onclick="event.stopPropagation();deleteQuest('${q.id}')">✕</button>
+        <span class="accordion-title">${q.title}${routineLabel ? `<span style="color:var(--muted);font-size:10px;margin-left:4px">[${routineLabel}]</span>` : ''}</span>
+        <div class="accordion-actions" onclick="event.stopPropagation()">
+          <span class="accordion-count">${doneCount}/${q.subtasks.length}</span>
+          <button class="btn btn-sm" onclick="openAddSubtaskModal('${q.id}')">+ 항목</button>
+          <button class="btn btn-sm" style="color:var(--green);border-color:var(--green)" onclick="completeQuest('${q.id}')">✔ 완료</button>
+          <button class="btn btn-sm" onclick="editQuest('${q.id}','${q.title.replace(/'/g, "\\'")}',${q.intimacy_reward})">✎</button>
+          <button class="btn btn-sm" style="color:var(--red);border-color:var(--red)" onclick="deleteQuest('${q.id}')">✕</button>
+        </div>
       </div>
       <div class="accordion-body" id="quest-${q.id}">
         ${q.subtasks.map(st => `

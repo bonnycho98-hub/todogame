@@ -564,13 +564,14 @@ body {
 
 /* ── 아코디언 (퀘스트 보드) ── */
 .accordion-header {
-  display: flex; align-items: center; gap: 8px; flex-wrap: nowrap;
+  display: flex; align-items: flex-start; gap: 6px; flex-wrap: wrap;
   cursor: pointer; padding: 10px 12px; color: var(--text);
 }
 .accordion-header:hover { color: var(--blue); }
-.accordion-arrow { color: var(--muted); font-size: 10px; width: 12px; flex-shrink: 0; }
-.accordion-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.accordion-count { color: var(--muted); font-size: 10px; white-space: nowrap; flex-shrink: 0; }
+.accordion-arrow { color: var(--muted); font-size: 10px; width: 12px; flex-shrink: 0; margin-top: 3px; }
+.accordion-title { flex: 1; min-width: 120px; font-size: 13px; line-height: 1.4; word-break: keep-all; }
+.accordion-count { color: var(--muted); font-size: 10px; white-space: nowrap; flex-shrink: 0; margin-top: 3px; }
+.accordion-actions { display: flex; gap: 4px; flex-shrink: 0; margin-left: auto; }
 .accordion-body { padding: 0 12px 8px; display: none; }
 .accordion-body.open { display: block; }
 
