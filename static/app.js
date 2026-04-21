@@ -67,19 +67,18 @@ function renderHappiness(h) {
 
 // ── 대시보드 렌더 헬퍼 ─────────────────────────────────────────────
 function renderRoutineQuest(q) {
-  const doneCount = q.subtasks.filter(s => s.is_done_today).length;
-  const total = q.subtasks.length;
-  const progress = total > 0 ? `[${doneCount}/${total}]` : '[–]';
-  const isDone = q.is_all_done_today;
-  const arrowClass = isDone ? 'r-check' : (doneCount > 0 ? 'r-arrow inprog' : 'r-arrow');
-  const arrowChar = isDone ? '✓' : '›';
+  const done = q.is_all_done_today;
+  const dots = (q.subtasks || []).map(s =>
+    `<div class="qdot${s.is_done_today ? ' done' : ''}"></div>`
+  ).join('');
+
   return `
-    <div class="r-row" onclick="openQuestModal('${q.id}')">
-      <span class="r-prog">${progress}</span>
-      <span class="r-title${isDone ? ' done' : ''}">${q.title}</span>
-      <span class="${arrowClass}">${arrowChar}</span>
-    </div>
-  `;
+    <div class="quest-row${done ? ' done' : ''}">
+      <div class="check-btn${done ? ' done' : ''}">${done ? '✓' : ''}</div>
+      <div class="quest-name${done ? ' done' : ''}">${q.title}</div>
+      <div class="quest-dots">${dots}</div>
+      <div class="quest-xp">+${q.intimacy_reward || 10}</div>
+    </div>`;
 }
 
 function renderNeedWithQuests(nwq) {
@@ -194,10 +193,12 @@ async function loadDashboard() {
   state.dashboard = data;
 
   // 오늘의 루틴
-  const routineEl = document.getElementById('routine-list');
-  routineEl.innerHTML = data.routine_quests.length
-    ? data.routine_quests.map(q => renderRoutineQuest(q)).join('')
-    : '<span style="color:var(--muted)">오늘 루틴 없음</span>';
+  const routines = data.routine_quests || [];
+  document.getElementById('routine-list').innerHTML =
+    routines.length ? routines.map(renderRoutineQuest).join('') : '<div class="empty-hint">오늘 루틴이 없어요</div>';
+  const routineDone = routines.filter(q => q.is_all_done_today).length;
+  const badge = document.getElementById('routine-badge');
+  if (badge) badge.textContent = `${routineDone} / ${routines.length}`;
 
   // 나를 사랑하기
   const selfEl = document.getElementById('self-section');
