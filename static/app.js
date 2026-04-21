@@ -71,6 +71,8 @@ function renderHappiness(h) {
 }
 
 // ── 대시보드 렌더 헬퍼 ─────────────────────────────────────────────
+let _nudgeFadeTimer = null;
+
 function renderRoutineQuest(q) {
   const done = q.is_all_done_today;
   const dots = (q.subtasks || []).map(s =>
@@ -188,6 +190,12 @@ function renderRoutineNudgeBanner(routines, streak) {
   const banner = document.getElementById('routine-nudge-banner');
   if (!banner) return;
 
+  if (_nudgeFadeTimer !== null) {
+    clearTimeout(_nudgeFadeTimer);
+    _nudgeFadeTimer = null;
+  }
+  banner.classList.remove('fade-out');
+
   const remaining = routines.filter(q => !q.is_all_done_today).length;
   const total = routines.length;
 
@@ -219,9 +227,12 @@ function renderRoutineNudgeBanner(routines, streak) {
         <div class="nudge-sub">스트릭 ${streak}일 달성 · 잘했어요 ✨</div>
       </div>
     `;
-    setTimeout(() => {
+    _nudgeFadeTimer = setTimeout(() => {
       banner.classList.add('fade-out');
-      setTimeout(() => { banner.style.display = 'none'; }, 600);
+      _nudgeFadeTimer = setTimeout(() => {
+        banner.style.display = 'none';
+        _nudgeFadeTimer = null;
+      }, 600);
     }, 3000);
   }
 }
