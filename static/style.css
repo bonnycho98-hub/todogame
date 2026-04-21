@@ -597,3 +597,41 @@ body {
   padding: 6px 0; border-bottom: 1px solid var(--dimmer);
 }
 .reward-row:last-child { border-bottom: none; }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg);
+  border-top: 1px solid var(--border-nav);
+  display: flex;
+  padding: 8px 0 16px;
+  box-shadow: 0 -2px 12px rgba(225, 29, 72, 0.06);
+  z-index: 200;
+}
+
+.bnav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+  padding: 2px 0;
+}
+
+.bnav-icon { font-size: 18px; line-height: 1; }
+
+.bnav-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.bnav-item.active .bnav-label {
+  color: var(--primary);
+}

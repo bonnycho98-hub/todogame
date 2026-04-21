@@ -27,6 +27,11 @@ function showPage(name) {
   document.getElementById('page-' + name).classList.add('active');
   document.getElementById('nav-' + name).classList.add('active');
 
+  // sync bottom nav
+  document.querySelectorAll('.bnav-item').forEach(el => el.classList.remove('active'));
+  const bnav = document.getElementById('bnav-' + name);
+  if (bnav) bnav.classList.add('active');
+
   if (name === 'dashboard') loadDashboard();
   if (name === 'quests') loadQuestBoard();
   if (name === 'npcs') loadNPCDetail();
