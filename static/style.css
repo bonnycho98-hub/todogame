@@ -80,6 +80,11 @@ body {
   transition: all 0.15s;
 }
 
+.nav-link:hover:not(.active) {
+  background: var(--primary-pale);
+  color: var(--text);
+}
+
 .nav-link.active {
   background: var(--primary-bg);
   color: var(--primary);
