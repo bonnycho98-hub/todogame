@@ -184,6 +184,48 @@ function findQuestInDashboard(questId) {
   return null;
 }
 
+function renderRoutineNudgeBanner(routines, streak) {
+  const banner = document.getElementById('routine-nudge-banner');
+  if (!banner) return;
+
+  const remaining = routines.filter(q => !q.is_all_done_today).length;
+  const total = routines.length;
+
+  if (total === 0) {
+    banner.style.display = 'none';
+    return;
+  }
+
+  if (remaining > 0) {
+    banner.className = 'warn';
+    banner.style.display = 'flex';
+    banner.style.opacity = '1';
+    banner.innerHTML = `
+      <div class="nudge-icon">🔥</div>
+      <div class="nudge-text">
+        <div class="nudge-title">오늘 루틴 ${remaining}개 남았어요</div>
+        <div class="nudge-sub">스트릭 ${streak}일 — 오늘 놓치면 리셋돼요!</div>
+      </div>
+      <button class="nudge-action" onclick="document.getElementById('routine-list').scrollIntoView({behavior:'smooth'})">지금 하기 →</button>
+    `;
+  } else {
+    banner.className = 'done';
+    banner.style.display = 'flex';
+    banner.style.opacity = '1';
+    banner.innerHTML = `
+      <div class="nudge-icon">🎉</div>
+      <div class="nudge-text">
+        <div class="nudge-title">오늘 루틴 완료!</div>
+        <div class="nudge-sub">스트릭 ${streak}일 달성 · 잘했어요 ✨</div>
+      </div>
+    `;
+    setTimeout(() => {
+      banner.classList.add('fade-out');
+      setTimeout(() => { banner.style.display = 'none'; }, 600);
+    }, 3000);
+  }
+}
+
 // ── 대시보드 ─────────────────────────────────────────────
 async function loadDashboard() {
   const data = await api('GET', '/dashboard');
@@ -196,6 +238,7 @@ async function loadDashboard() {
   const routineDone = routines.filter(q => q.is_all_done_today).length;
   const badge = document.getElementById('routine-badge');
   if (badge) badge.textContent = `${routineDone} / ${routines.length}`;
+  renderRoutineNudgeBanner(routines, data.streak || 0);
 
   // 나를 사랑하기
   const selfNeeds = (data.self_section && data.self_section.needs) || [];
