@@ -216,9 +216,9 @@ async function loadDashboard() {
 
   // 히어로 통계
   const allQuests = [
-    ...(data.routines || []),
-    ...(data.self_needs || []).flatMap(n => n.quests || []),
-    ...(data.npc_sections || []).flatMap(s => (s.needs || []).flatMap(n => n.quests || []))
+    ...(data.routine_quests || []),
+    ...((data.self_section && data.self_section.needs) || []).flatMap(n => n.quests || []),
+    ...(data.npc_section || []).flatMap(s => (s.needs || []).flatMap(n => n.quests || []))
   ];
   const done = allQuests.filter(q => q.is_all_done_today).length;
   const remain = allQuests.filter(q => !q.is_all_done_today).length;
