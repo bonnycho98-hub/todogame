@@ -83,35 +83,32 @@ function renderRoutineQuest(q) {
 
 function renderNeedWithQuests(nwq) {
   const need = nwq.need;
-  const quests = nwq.quests;
-  const allDone = quests.length > 0 && quests.every(q => q.is_all_done_today);
+  const quests = nwq.quests || [];
+  const doneCount = quests.filter(q => q.is_all_done_today).length;
 
   const questRows = quests.map(q => {
-    const doneCount = q.subtasks.filter(s => s.is_done_today).length;
-    const total = q.subtasks.length || 1;
-    const isDone = q.is_all_done_today;
-    const dots = Array.from({ length: Math.min(total, 5) }, (_, i) =>
-      `<div class="nd${i < doneCount ? ' done' : (i === doneCount && doneCount < total && doneCount > 0 ? ' act' : '')}"></div>`
+    const dots = (q.subtasks || []).map(s =>
+      `<div class="qdot${s.is_done_today ? ' done' : ''}"></div>`
     ).join('');
     return `
-      <div class="n-row" onclick="openQuestModal('${q.id}')">
-        <div class="ndots">${dots}</div>
-        <span class="n-title${isDone ? ' done' : ''}">${q.title}</span>
-        <span class="n-count${isDone ? ' done' : ''}">${isDone ? '✓' : `${doneCount}/${total}`}</span>
-      </div>
-    `;
+      <div class="quest-row${q.is_all_done_today ? ' done' : ''}">
+        <div class="check-btn${q.is_all_done_today ? ' done' : ''}">${q.is_all_done_today ? '✓' : ''}</div>
+        <div class="quest-name${q.is_all_done_today ? ' done' : ''}">${q.title}</div>
+        <div class="quest-dots">${dots}</div>
+        <div class="quest-xp">+${q.intimacy_reward || 10}</div>
+      </div>`;
   }).join('');
 
   return `
-    <div class="entity">
-      <div class="e-header">
-        <span style="color:var(--purple)">✦</span>
-        <span class="e-self-name">${need.title}</span>
-        ${allDone ? '<span class="e-done-label">✓</span>' : ''}
+    <div class="need-block">
+      <div class="need-header">
+        <div class="need-icon">✦</div>
+        <div class="need-name">${need.title}</div>
+        <div class="need-progress">${doneCount}/${quests.length}</div>
+        <div class="need-arrow">▼</div>
       </div>
-      ${questRows}
-    </div>
-  `;
+      <div class="quest-list">${questRows}</div>
+    </div>`;
 }
 
 function renderNPCSectionItem(item) {
@@ -201,10 +198,13 @@ async function loadDashboard() {
   if (badge) badge.textContent = `${routineDone} / ${routines.length}`;
 
   // 나를 사랑하기
-  const selfEl = document.getElementById('self-section');
-  selfEl.innerHTML = data.self_section.needs.length
-    ? data.self_section.needs.map(nwq => renderNeedWithQuests(nwq)).join('')
-    : '<span style="color:var(--muted)">등록된 니즈 없음</span>';
+  const selfNeeds = (data.self_section && data.self_section.needs) || [];
+  document.getElementById('self-section').innerHTML =
+    selfNeeds.length ? selfNeeds.map(renderNeedWithQuests).join('') : '<div class="empty-hint">셀프 퀘스트가 없어요</div>';
+  const selfDone = selfNeeds.flatMap(n => n.quests || []).filter(q => q.is_all_done_today).length;
+  const selfTotal = selfNeeds.flatMap(n => n.quests || []).length;
+  const selfBadge = document.getElementById('self-badge');
+  if (selfBadge) selfBadge.textContent = `${selfDone} / ${selfTotal}`;
 
   // 타인을 사랑하기
   const npcEl = document.getElementById('npc-list');
