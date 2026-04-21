@@ -481,22 +481,33 @@ body {
   border-radius: 3px;
 }
 .btn:hover { border-color: var(--red); color: var(--red); }
-.btn-primary { background: var(--red); border-color: var(--red); color: #fff; }
-.btn-primary:hover { background: #c73650; }
+.btn-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.btn-primary:hover { background: var(--primary-light); border-color: var(--primary-light); }
 .btn-sm { padding: 3px 8px; font-size: 11px; }
 
 /* ── 인풋 ── */
 .input {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: 6px 10px;
+  background: var(--bg2);
+  border: 1px solid var(--border-nav);
+  border-radius: 8px;
+  padding: 8px 12px;
   font-family: var(--font);
-  font-size: 12px;
-  border-radius: 3px;
+  font-size: 13px;
+  color: var(--text-strong);
   width: 100%;
 }
-.input:focus { outline: none; border-color: var(--red); }
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
 
 /* ── 탭 ── */
 .tabs { display: flex; gap: 0; margin-bottom: 14px; flex-wrap: nowrap; overflow-x: auto; border-bottom: 1px solid var(--dimmer); }
@@ -548,8 +559,14 @@ body {
 }
 .modal-overlay.open { display: flex; }
 .modal {
-  background: var(--bg2); border: 2px solid var(--red);
-  border-radius: 6px; padding: 24px; max-width: 400px; width: 90%;
+  border: 1px solid var(--border-nav);
+  border-radius: 16px;
+  background: var(--bg);
+  padding: 20px;
+  width: 90%;
+  max-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 .modal h2 { color: var(--red); margin-bottom: 16px; }
 
@@ -634,4 +651,12 @@ body {
 
 .bnav-item.active .bnav-label {
   color: var(--primary);
+}
+
+/* ── MISC ── */
+.empty-hint {
+  padding: 16px;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
 }
