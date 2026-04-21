@@ -1,19 +1,24 @@
 /* static/style.css */
 :root {
-  --bg: #0d1117;
-  --bg2: #0f1923;
-  --bg3: #1c2333;
-  --border: #2a3344;
-  --dimmer: #111820;
-  --dim: #3a4a5a;
-  --red: #e94560;
-  --yellow: #ffd32a;
-  --blue: #a8dadc;
-  --green: #3fb950;
-  --text: #cdd9e5;
-  --muted: #768390;
-  --purple: #a371f7;
-  --font: 'Courier New', Courier, monospace;
+  --bg:            #ffffff;
+  --bg2:           #fafafa;
+  --bg3:           #f5f5f5;
+  --bg-subtle:     #fffafa;
+  --border:        #fef2f2;
+  --border-nav:    #ffe4e6;
+  --primary:       #e11d48;
+  --primary-light: #fb7185;
+  --primary-bg:    #ffe4e6;
+  --primary-pale:  #fff1f2;
+  --text:          #374151;
+  --text-strong:   #1f2937;
+  --muted:         #9ca3af;
+  --intimacy-bg:   #fef3c7;
+  --intimacy:      #d97706;
+  --dot-empty:     #fecdd3;
+  --dot-done:      #e11d48;
+  --green:         #10b981;
+  --font:          'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -22,27 +27,24 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font);
-  font-size: 13px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
 }
 
-/* ── 레이아웃 ── */
-.app { display: flex; flex-direction: column; min-height: 100vh; }
-
-.navbar {
-  background: var(--bg2);
-  border-bottom: 1px solid var(--red);
-  padding: 10px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.page {
+  display: none;
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+  padding-bottom: 80px;
 }
-.navbar-brand { color: var(--red); font-size: 16px; letter-spacing: 2px; }
-.navbar-links { display: flex; gap: 16px; }
-.navbar-links a { color: var(--muted); cursor: pointer; text-decoration: none; }
-.navbar-links a.active, .navbar-links a:hover { color: var(--text); }
 
-.page { display: none; padding: 20px; max-width: 900px; margin: 0 auto; width: 100%; }
 .page.active { display: block; }
 
 /* ── 행복 레벨 인라인 바 ── */
