@@ -2,6 +2,7 @@ from datetime import date
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app import models
+from app.utils import today_kst
 
 
 def is_routine_match(routine: dict | None, today: date) -> bool:
@@ -19,7 +20,7 @@ def is_routine_match(routine: dict | None, today: date) -> bool:
 
 
 def is_quest_active_today(quest: models.Quest, today: date = None) -> bool:
-    today = today or date.today()
+    today = today or today_kst()
     if quest.quest_type == models.QuestType.ONE_TIME and quest.is_archived:
         return False
     if quest.quest_type == models.QuestType.DAILY:
@@ -89,7 +90,7 @@ def complete_quest(db: Session, quest_id: str, today: date = None) -> dict:
     퀘스트를 직접 완료 처리한다. 서브태스크 전부 완료 + 친밀도 보상 지급.
     반환: {"quest_done": bool, "level_up": int | None}
     """
-    today = today or date.today()
+    today = today or today_kst()
     quest = db.get(models.Quest, quest_id)
     if quest is None:
         raise ValueError(f"Quest {quest_id} not found")
@@ -138,7 +139,7 @@ def complete_subtask(db: Session, subtask_id: str, today: date = None) -> dict:
     모든 서브태스크 완료 시 퀘스트 완료 → 친밀도 보상 지급.
     반환: {"subtask_done": bool, "quest_done": bool, "level_up": int | None}
     """
-    today = today or date.today()
+    today = today or today_kst()
     subtask = db.get(models.Subtask, subtask_id)
     if subtask is None:
         raise ValueError(f"Subtask {subtask_id} not found")

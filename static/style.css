@@ -384,9 +384,21 @@ body {
   padding-left: 48px;
 }
 
-/* 모든 퀘스트 완료된 NPC 블록 흐리게 */
-.need-block.all-done {
-  opacity: 0.45;
+.need-done-btn {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  border: 1.5px solid var(--primary);
+  color: var(--primary);
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.need-done-btn:hover {
+  background: var(--primary);
+  color: white;
 }
 
 /* ── 섹션 헤더 (구분선) ── */

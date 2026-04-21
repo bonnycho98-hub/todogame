@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session, selectinload
 from datetime import date, datetime
+from app.utils import today_kst
 from app.database import get_db
 from app import models, schemas
 from app.services.happiness import calculate_happiness
@@ -31,7 +32,7 @@ def _build_quest_out(quest: models.Quest, db: Session, today: date) -> schemas.Q
 
 @router.get("", response_model=schemas.DashboardOut)
 def get_dashboard(db: Session = Depends(get_db)):
-    today = date.today()
+    today = today_kst()
 
     # ── 오늘의 루틴 ──────────────────────────────────────────
     # DAILY 타입이고 오늘 스케줄에 해당하는 미archived 퀘스트

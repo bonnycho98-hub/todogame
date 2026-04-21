@@ -52,17 +52,17 @@ async def telegram_webhook(request: Request):
 
 def _start_scheduler():
     from apscheduler.schedulers.asyncio import AsyncIOScheduler
-    from app.config import BRIEFING_HOUR, BRIEFING_MINUTE, TELEGRAM_CHAT_ID
+    from app.config import BRIEFING_HOUR, BRIEFING_MINUTE, EVENING_HOUR, EVENING_MINUTE, TELEGRAM_CHAT_ID
     from app.database import get_session_local
-    from app.telegram.formatter import format_briefing
+    from app.telegram.formatter import format_briefing, format_evening_briefing
     from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
-    scheduler = AsyncIOScheduler()
+    scheduler = AsyncIOScheduler(timezone="Asia/Seoul")
 
-    async def send_daily_brief():
+    async def _send(formatter):
         db = get_session_local()()
         try:
-            text, button_rows = format_briefing(db)
+            text, button_rows = formatter(db)
             keyboard = InlineKeyboardMarkup(
                 [[InlineKeyboardButton(btn["text"], callback_data=btn["callback_data"])]
                  for row in button_rows for btn in row]
@@ -78,8 +78,50 @@ def _start_scheduler():
         finally:
             db.close()
 
-    scheduler.add_job(send_daily_brief, "cron", hour=BRIEFING_HOUR, minute=BRIEFING_MINUTE)
+    async def send_morning_brief():
+        await _send(format_briefing)
+
+    async def send_evening_brief():
+        await _send(format_evening_briefing)
+
+    scheduler.add_job(send_morning_brief, "cron", hour=BRIEFING_HOUR, minute=BRIEFING_MINUTE)
+    scheduler.add_job(send_evening_brief, "cron", hour=EVENING_HOUR, minute=EVENING_MINUTE)
     scheduler.start()
+
+
+@app.post("/telegram/test-briefing")
+async def test_briefing():
+    """아침/저녁 브리핑을 즉시 전송 (테스트용)"""
+    if not TELEGRAM_TOKEN:
+        return Response(status_code=404)
+    from app.config import TELEGRAM_CHAT_ID
+    from app.database import get_session_local
+    from app.telegram.formatter import format_briefing, format_evening_briefing
+    from app.telegram.bot import get_bot_app
+    from telegram import InlineKeyboardMarkup, InlineKeyboardButton
+
+    bot = get_bot_app()
+
+    async def _send(formatter):
+        db = get_session_local()()
+        try:
+            text, button_rows = formatter(db)
+            keyboard = InlineKeyboardMarkup(
+                [[InlineKeyboardButton(btn["text"], callback_data=btn["callback_data"])]
+                 for row in button_rows for btn in row]
+            ) if button_rows else None
+            await bot.bot.send_message(
+                chat_id=TELEGRAM_CHAT_ID,
+                text=text,
+                parse_mode="MarkdownV2",
+                reply_markup=keyboard,
+            )
+        finally:
+            db.close()
+
+    await _send(format_briefing)
+    await _send(format_evening_briefing)
+    return {"status": "sent"}
 
 
 @app.get("/")

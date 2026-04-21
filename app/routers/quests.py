@@ -2,6 +2,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import date
+from app.utils import today_kst
 from app.database import get_db
 from app import models, schemas
 from app.services.quest import is_subtask_done_today, is_quest_all_done_today
@@ -26,14 +27,14 @@ def _enrich_quest(quest: models.Quest, db: Session, today: date) -> schemas.Ques
 
 @router.get("/orphans", response_model=list[schemas.QuestOut])
 def list_orphan_quests(db: Session = Depends(get_db)):
-    today = date.today()
+    today = today_kst()
     quests = db.query(models.Quest).filter(models.Quest.need_id.is_(None)).all()
     return [_enrich_quest(quest, db, today) for quest in quests]
 
 
 @router.get("", response_model=list[schemas.QuestOut])
 def list_quests(need_id: str, db: Session = Depends(get_db)):
-    today = date.today()
+    today = today_kst()
     quests = db.query(models.Quest).filter(models.Quest.need_id == need_id).all()
     return [_enrich_quest(quest, db, today) for quest in quests]
 
@@ -50,7 +51,7 @@ def create_quest(body: schemas.QuestCreate, db: Session = Depends(get_db)):
     db.add(quest)
     db.commit()
     db.refresh(quest)
-    return _enrich_quest(quest, db, date.today())
+    return _enrich_quest(quest, db, today_kst())
 
 
 @router.patch("/{quest_id}", response_model=schemas.QuestOut)
@@ -68,7 +69,7 @@ def update_quest(quest_id: UUID, body: schemas.QuestUpdate, db: Session = Depend
         quest.intimacy_reward = body.intimacy_reward
     db.commit()
     db.refresh(quest)
-    return _enrich_quest(quest, db, date.today())
+    return _enrich_quest(quest, db, today_kst())
 
 
 @router.post("/{quest_id}/complete")

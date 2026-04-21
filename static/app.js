@@ -79,7 +79,7 @@ function renderRoutineQuest(q) {
 
   return `
     <div class="quest-row${done ? ' done' : ''}">
-      <div class="check-btn${done ? ' done' : ''}">${done ? '✓' : ''}</div>
+      <div class="check-btn${done ? ' done' : ''}" ${!done ? `onclick="completeQuestDash('${q.id}')"` : ''}>${done ? '✓' : ''}</div>
       <div class="quest-name${done ? ' done' : ''}">${q.title}</div>
       <div class="quest-dots">${dots}</div>
       <div class="quest-xp">+${q.intimacy_reward || 10}</div>
@@ -97,7 +97,7 @@ function renderNeedWithQuests(nwq) {
     ).join('');
     return `
       <div class="quest-row${q.is_all_done_today ? ' done' : ''}">
-        <div class="check-btn${q.is_all_done_today ? ' done' : ''}">${q.is_all_done_today ? '✓' : ''}</div>
+        <div class="check-btn${q.is_all_done_today ? ' done' : ''}" ${!q.is_all_done_today ? `onclick="completeQuestDash('${q.id}')"` : ''}>${q.is_all_done_today ? '✓' : ''}</div>
         <div class="quest-name${q.is_all_done_today ? ' done' : ''}">${q.title}</div>
         <div class="quest-dots">${dots}</div>
         <div class="quest-xp">+${q.intimacy_reward || 10}</div>
@@ -110,7 +110,7 @@ function renderNeedWithQuests(nwq) {
         <div class="need-icon">✦</div>
         <div class="need-name">${need.title}</div>
         <div class="need-progress">${doneCount}/${quests.length}</div>
-        <div class="need-arrow">▼</div>
+        <button class="need-done-btn" onclick="completeNeed('${need.id}')">완료</button>
       </div>
       <div class="quest-list">${questRows}</div>
     </div>`;
@@ -133,7 +133,7 @@ function renderNPCSectionItem(item) {
       ).join('');
       return `
         <div class="quest-row${q.is_all_done_today ? ' done' : ''}">
-          <div class="check-btn${q.is_all_done_today ? ' done' : ''}">${q.is_all_done_today ? '✓' : ''}</div>
+          <div class="check-btn${q.is_all_done_today ? ' done' : ''}" ${!q.is_all_done_today ? `onclick="completeQuestDash('${q.id}')"` : ''}>${q.is_all_done_today ? '✓' : ''}</div>
           <div class="quest-name${q.is_all_done_today ? ' done' : ''}">${q.title}</div>
           <div class="quest-dots">${dots}</div>
           <div class="quest-xp">+${q.intimacy_reward || 10}</div>
@@ -145,17 +145,13 @@ function renderNPCSectionItem(item) {
         <div class="need-icon">❤️</div>
         <div class="need-name">${need.title}</div>
         <div class="need-progress">${doneCount}/${quests.length}</div>
-        <div class="need-arrow">▼</div>
+        <button class="need-done-btn" onclick="completeNeed('${need.id}')">완료</button>
       </div>
       <div class="quest-list">${questRows}</div>`;
   }).join('');
 
-  const allDone = needs.every(n =>
-    (n.quests || []).every(q => q.is_all_done_today)
-  );
-
   return `
-    <div class="need-block npc-block${allDone ? ' all-done' : ''}">
+    <div class="need-block npc-block">
       <div class="npc-header">
         <div class="npc-avatar">${firstChar}</div>
         <div class="npc-info">
@@ -243,6 +239,18 @@ async function loadDashboard() {
     state.pendingRewardId = r.id;
     document.getElementById('modal-levelup').classList.add('open');
   }
+}
+
+async function completeQuestDash(id) {
+  const result = await api('POST', `/quests/${id}/complete`);
+  if (result && result.level_up) alert(`🎊 LEVEL UP! lv.${result.level_up}`);
+  await loadDashboard();
+}
+
+async function completeNeed(id) {
+  if (!confirm('니즈를 완료할까요? 완료된 니즈는 목록에서 사라집니다.')) return;
+  await api('POST', `/needs/${id}/complete`);
+  await loadDashboard();
 }
 
 async function completeSubtask(id, checkbox) {
