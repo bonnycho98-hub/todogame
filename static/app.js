@@ -51,14 +51,18 @@ function renderSpriteInline(spriteJson, color) {
 
 // ── 행복 레벨 렌더링 ─────────────────────────────────────────────
 function renderHappiness(h) {
-  const pct = h.progress * 100;
-  return `
-    <span class="hp-inline-lv">lv.${h.level}</span>
-    <div class="hp-inline-track">
-      <div class="hp-inline-fill" style="width:${pct}%"></div>
-    </div>
-    <span class="hp-inline-label">lv.${h.level + 1}까지 ${Math.round((1 - h.progress) * 100)}%</span>
-  `;
+  const display = document.getElementById('happiness-display');
+  if (display) {
+    display.innerHTML = `
+      <div class="hp-level-row">
+        <span class="hp-lv-num">${h.level}</span>
+        <span class="hp-lv-lbl">LEVEL</span>
+      </div>`;
+  }
+  const fill = document.getElementById('hero-bar-fill');
+  if (fill) fill.style.width = `${Math.round(h.progress * 100)}%`;
+  const xpText = document.getElementById('hero-xp-text');
+  if (xpText) xpText.textContent = `다음 레벨까지 ${Math.round(h.progress * 100)}%`;
 }
 
 // ── 대시보드 렌더 헬퍼 ─────────────────────────────────────────────
@@ -208,7 +212,22 @@ async function loadDashboard() {
     : '<span style="color:var(--muted)">NPC 없음</span>';
 
   // 행복 레벨
-  document.getElementById('happiness-display').innerHTML = renderHappiness(data.happiness);
+  renderHappiness(data.happiness);
+
+  // 히어로 통계
+  const allQuests = [
+    ...(data.routines || []),
+    ...(data.self_needs || []).flatMap(n => n.quests || []),
+    ...(data.npc_sections || []).flatMap(s => (s.needs || []).flatMap(n => n.quests || []))
+  ];
+  const done = allQuests.filter(q => q.is_all_done_today).length;
+  const remain = allQuests.filter(q => !q.is_all_done_today).length;
+  const doneEl = document.getElementById('hero-done');
+  const remainEl = document.getElementById('hero-remain');
+  const streakEl = document.getElementById('hero-streak');
+  if (doneEl) doneEl.textContent = done;
+  if (remainEl) remainEl.textContent = remain;
+  if (streakEl) streakEl.textContent = `🔥${data.streak || 0}`;
 
   // 레벨업 보상 팝업
   if (data.pending_level_reward) {

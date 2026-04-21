@@ -113,6 +113,84 @@ body {
 .hp-inline-fill { height: 100%; background: var(--yellow); }
 .hp-inline-label { color: var(--dim); font-size: 11px; white-space: nowrap; }
 
+/* ── HERO CARD ── */
+.hero-card {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  padding: 14px 16px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+.hero-card::after {
+  content: '';
+  position: absolute;
+  top: -30px; right: -20px;
+  width: 100px; height: 100px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.hero-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: 12px;
+}
+.hero-stats {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.hero-stat {
+  text-align: center;
+  background: rgba(255,255,255,0.18);
+  border-radius: 8px;
+  padding: 4px 10px;
+}
+.hero-stat-val {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.hero-stat-lbl {
+  font-size: 8px;
+  opacity: 0.85;
+}
+.hero-bar-wrap {
+  height: 5px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 3px;
+  margin-bottom: 5px;
+}
+.hero-bar-fill {
+  height: 5px;
+  background: white;
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.4s ease;
+}
+.hero-xp-text {
+  font-size: 9px;
+  opacity: 0.8;
+}
+.hp-level-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  color: white;
+}
+.hp-lv-num {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+}
+.hp-lv-lbl {
+  font-size: 10px;
+  opacity: 0.8;
+  font-weight: 600;
+}
+
 /* ── 섹션 헤더 (구분선) ── */
 .sh {
   display: flex;

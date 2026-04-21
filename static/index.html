@@ -24,7 +24,29 @@
 
   <!-- 대시보드 -->
   <div id="page-dashboard" class="page active">
-    <div id="happiness-display" class="hp-inline"></div>
+    <div class="hero-card">
+      <div class="hero-top">
+        <div id="happiness-display"></div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-val" id="hero-done">0</div>
+            <div class="hero-stat-lbl">완료</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-val" id="hero-remain">0</div>
+            <div class="hero-stat-lbl">남음</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-val" id="hero-streak">🔥0</div>
+            <div class="hero-stat-lbl">스트릭</div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-bar-wrap">
+        <div class="hero-bar-fill" id="hero-bar-fill"></div>
+      </div>
+      <div class="hero-xp-text" id="hero-xp-text"></div>
+    </div>
 
     <div class="dash-section">
       <div class="sh">루틴</div>
