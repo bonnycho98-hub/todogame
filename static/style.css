@@ -643,6 +643,56 @@ body {
 }
 .reward-row:last-child { border-bottom: none; }
 
+/* ── 루틴 유도 배너 ────────────────────────────────────── */
+#routine-nudge-banner {
+  margin: 8px 0 4px;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: opacity 0.6s ease;
+}
+#routine-nudge-banner.warn {
+  background: linear-gradient(135deg, #c1121f, #e63946);
+  box-shadow: 0 4px 16px rgba(230, 57, 70, 0.35);
+}
+#routine-nudge-banner.done {
+  background: linear-gradient(135deg, #2d6a4f, #40916c);
+  box-shadow: 0 4px 16px rgba(64, 145, 108, 0.35);
+}
+#routine-nudge-banner.fade-out {
+  opacity: 0;
+}
+.nudge-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+.nudge-text {
+  flex: 1;
+}
+.nudge-title {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.nudge-sub {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 11px;
+}
+.nudge-action {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  padding: 6px 12px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  border: none;
+}
+
 /* ── BOTTOM NAV ── */
 .bottom-nav {
   position: fixed;
