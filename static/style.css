@@ -191,6 +191,204 @@ body {
   font-weight: 600;
 }
 
+/* ── SECTION LABEL ── */
+.section-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px 7px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: var(--bg2);
+  border-top: 1px solid #f3f4f6;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.section-badge {
+  font-size: 10px;
+  font-weight: 600;
+  background: var(--primary-bg);
+  color: var(--primary);
+  padding: 1px 8px;
+  border-radius: 20px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* ── NEED BLOCK ── */
+.need-block {
+  border-bottom: 1px solid #f9f9f9;
+}
+
+.need-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  cursor: pointer;
+  background: var(--bg);
+  user-select: none;
+}
+
+.need-icon { font-size: 13px; flex-shrink: 0; }
+
+.need-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-strong);
+  flex: 1;
+}
+
+.need-progress {
+  font-size: 10px;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.need-arrow {
+  font-size: 10px;
+  color: var(--muted);
+  margin-left: 2px;
+}
+
+/* ── QUEST ROW ── */
+.quest-list {
+  background: var(--bg-subtle);
+}
+
+.quest-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px 8px 32px;
+  border-top: 1px solid var(--border);
+  transition: opacity 0.2s;
+}
+
+.quest-row.done { opacity: 0.45; }
+
+.check-btn {
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  border: 1.5px solid #fca5a5;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: white;
+}
+
+.check-btn.done {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.quest-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-strong);
+  flex: 1;
+}
+
+.quest-name.done {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+.quest-dots {
+  display: flex;
+  gap: 3px;
+}
+
+.qdot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--dot-empty);
+}
+
+.qdot.done { background: var(--dot-done); }
+
+.quest-xp {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--primary);
+  min-width: 24px;
+  text-align: right;
+}
+
+/* ── NPC HEADER ── */
+.npc-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--bg);
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+}
+
+.npc-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fecdd3, #fda4af);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #881337;
+  flex-shrink: 0;
+}
+
+.npc-info { flex: 1; }
+
+.npc-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.npc-meta {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+.intimacy-pill {
+  font-size: 9px;
+  font-weight: 700;
+  background: var(--intimacy-bg);
+  color: var(--intimacy);
+  padding: 2px 7px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+/* NPC 아래 Need와 Quest는 인덴트 */
+.npc-block .need-header {
+  padding-left: 32px;
+  background: var(--bg-subtle);
+}
+
+.npc-block .quest-row {
+  padding-left: 48px;
+}
+
+/* 모든 퀘스트 완료된 NPC 블록 흐리게 */
+.need-block.all-done {
+  opacity: 0.45;
+}
+
 /* ── 섹션 헤더 (구분선) ── */
 .sh {
   display: flex;
