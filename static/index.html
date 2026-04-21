@@ -4,18 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LOVE QUEST</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 <div class="app">
 
   <nav class="navbar">
-    <span class="navbar-brand">♛ LOVE QUEST</span>
+    <div class="navbar-brand">LoveQuest</div>
     <div class="navbar-links">
-      <a onclick="showPage('dashboard')" id="nav-dashboard" class="active">DASHBOARD</a>
-      <a onclick="showPage('quests')" id="nav-quests">QUESTS</a>
-      <a onclick="showPage('npcs')" id="nav-npcs">NPC</a>
-      <a onclick="showPage('rewards')" id="nav-rewards">REWARDS</a>
+      <a id="nav-dashboard" class="nav-link active" onclick="showPage('dashboard')">홈</a>
+      <a id="nav-quests"    class="nav-link"        onclick="showPage('quests')">퀘스트</a>
+      <a id="nav-npcs"      class="nav-link"        onclick="showPage('npcs')">NPC</a>
+      <a id="nav-rewards"   class="nav-link"        onclick="showPage('rewards')">보상</a>
     </div>
   </nav>
 
