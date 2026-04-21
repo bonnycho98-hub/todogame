@@ -100,6 +100,19 @@ body {
 
 .page.active { display: block; }
 
+#page-quests, #page-npcs, #page-rewards {
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 12px;
+}
+
+.card {
+  background: var(--bg);
+  border: 1px solid var(--border-nav);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
 /* ── 행복 레벨 인라인 바 ── */
 .hp-inline {
   display: flex;
@@ -502,7 +515,7 @@ body {
 }
 
 .btn-primary:hover { background: var(--primary-light); border-color: var(--primary-light); }
-.btn-sm { padding: 3px 8px; font-size: 11px; }
+.btn-sm { padding: 3px 8px; font-size: 11px; white-space: nowrap; flex-shrink: 0; }
 
 /* ── 인풋 ── */
 .input {
@@ -551,12 +564,14 @@ body {
 
 /* ── 아코디언 (퀘스트 보드) ── */
 .accordion-header {
-  display: flex; align-items: center; gap: 8px;
-  cursor: pointer; padding: 6px 0; color: var(--text);
+  display: flex; align-items: center; gap: 8px; flex-wrap: nowrap;
+  cursor: pointer; padding: 10px 12px; color: var(--text);
 }
 .accordion-header:hover { color: var(--blue); }
-.accordion-arrow { color: var(--muted); font-size: 10px; width: 12px; }
-.accordion-body { padding-left: 20px; display: none; }
+.accordion-arrow { color: var(--muted); font-size: 10px; width: 12px; flex-shrink: 0; }
+.accordion-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.accordion-count { color: var(--muted); font-size: 10px; white-space: nowrap; flex-shrink: 0; }
+.accordion-body { padding: 0 12px 8px; display: none; }
 .accordion-body.open { display: block; }
 
 /* ── 친밀도 바 (NPC 관리) ── */
