@@ -643,6 +643,41 @@ body {
 }
 .reward-row:last-child { border-bottom: none; }
 
+/* ── 루틴 서브태스크 ────────────────────────────────────── */
+.routine-quest-block {
+  background: var(--card);
+  border-radius: 10px;
+  margin-bottom: 4px;
+  overflow: hidden;
+}
+.routine-quest-block.done { opacity: 0.45; }
+.routine-quest-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px 4px;
+}
+.routine-subtask-list {
+  padding: 0 12px 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.routine-subtask-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+}
+.routine-subtask-name {
+  font-size: 11px;
+  color: var(--text);
+}
+.routine-subtask-name.done {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
 /* ── 루틴 유도 배너 ────────────────────────────────────── */
 #routine-nudge-banner {
   margin: 8px 0 4px;

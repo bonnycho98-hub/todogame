@@ -74,16 +74,31 @@ function renderHappiness(h) {
 let _nudgeFadeTimer = null;
 
 function renderRoutineQuest(q) {
-  const done = q.is_all_done_today;
-  const dots = (q.subtasks || []).map(s =>
-    `<div class="qdot${s.is_done_today ? ' done' : ''}"></div>`
-  ).join('');
+  const allDone = q.is_all_done_today;
+
+  if (q.subtasks && q.subtasks.length > 0) {
+    const subtaskRows = q.subtasks.map(s => {
+      const done = s.is_done_today;
+      return `
+        <div class="routine-subtask-row${done ? ' done' : ''}">
+          <div class="check-btn${done ? ' done' : ''}" ${!done ? `onclick="completeSubtaskDash('${s.id}', this)"` : ''}>${done ? '✓' : ''}</div>
+          <div class="routine-subtask-name${done ? ' done' : ''}">${s.title}</div>
+        </div>`;
+    }).join('');
+    return `
+      <div class="routine-quest-block${allDone ? ' done' : ''}">
+        <div class="routine-quest-header">
+          <div class="quest-name${allDone ? ' done' : ''}">${q.title}</div>
+          <div class="quest-xp">+${q.intimacy_reward || 10}</div>
+        </div>
+        <div class="routine-subtask-list">${subtaskRows}</div>
+      </div>`;
+  }
 
   return `
-    <div class="quest-row${done ? ' done' : ''}">
-      <div class="check-btn${done ? ' done' : ''}" ${!done ? `onclick="completeQuestDash('${q.id}')"` : ''}>${done ? '✓' : ''}</div>
-      <div class="quest-name${done ? ' done' : ''}">${q.title}</div>
-      <div class="quest-dots">${dots}</div>
+    <div class="quest-row${allDone ? ' done' : ''}">
+      <div class="check-btn${allDone ? ' done' : ''}" ${!allDone ? `onclick="completeQuestDash('${q.id}')"` : ''}>${allDone ? '✓' : ''}</div>
+      <div class="quest-name${allDone ? ' done' : ''}">${q.title}</div>
       <div class="quest-xp">+${q.intimacy_reward || 10}</div>
     </div>`;
 }
@@ -299,6 +314,27 @@ async function completeQuestDash(id) {
   const result = await api('POST', `/quests/${id}/complete`);
   if (result && result.level_up) alert(`🎊 LEVEL UP! lv.${result.level_up}`);
   await loadDashboard();
+}
+
+async function completeSubtaskDash(id, el) {
+  try {
+    const result = await api('POST', `/subtasks/${id}/complete`);
+    if (result.quest_done) {
+      await loadDashboard();
+    } else {
+      el.classList.add('done');
+      el.textContent = '✓';
+      el.onclick = null;
+      const row = el.closest('.routine-subtask-row');
+      if (row) {
+        row.classList.add('done');
+        const nameEl = row.querySelector('.routine-subtask-name');
+        if (nameEl) nameEl.classList.add('done');
+      }
+    }
+  } catch (e) {
+    alert(e.message);
+  }
 }
 
 async function completeNeed(id) {
