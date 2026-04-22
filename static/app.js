@@ -470,7 +470,7 @@ function renderQuestAccordion(q) {
           <span class="accordion-count">${doneCount}/${q.subtasks.length}</span>
           <button class="btn btn-sm" onclick="openAddSubtaskModal('${q.id}')">+ 항목</button>
           <button class="btn btn-sm" style="color:var(--green);border-color:var(--green)" onclick="completeQuest('${q.id}')">✔ 완료</button>
-          <button class="btn btn-sm" onclick="editQuest('${q.id}','${q.title.replace(/'/g, "\\'")}',${q.intimacy_reward})">✎</button>
+          <button class="btn btn-sm" onclick="openEditQuestModal(${JSON.stringify(q).replace(/"/g, '&quot;')})">✎</button>
           <button class="btn btn-sm" style="color:var(--red);border-color:var(--red)" onclick="deleteQuest('${q.id}')">✕</button>
         </div>
       </div>
@@ -730,14 +730,53 @@ async function deleteSubtask(id) {
 }
 
 function openAddQuestModal(needId) {
+  document.getElementById('modal-quest-title').textContent = '퀘스트 추가';
+  document.getElementById('btn-submit-quest').textContent = '추가';
   document.getElementById('quest-title').value = '';
   document.getElementById('quest-type').value = 'daily';
   document.getElementById('quest-reward').value = '10';
   document.getElementById('quest-need-id').value = needId || '';
+  document.getElementById('quest-editing-id').value = '';
   document.getElementById('routine-section').style.display = '';
   document.getElementById('routine-type').value = 'daily';
   document.getElementById('routine-days').style.display = 'none';
   document.getElementById('routine-dates').style.display = 'none';
+  document.querySelectorAll('#routine-days input[type=checkbox]').forEach(c => c.checked = false);
+  document.getElementById('routine-dates-input').value = '';
+  document.getElementById('modal-quest').classList.add('open');
+}
+
+function openEditQuestModal(q) {
+  document.getElementById('modal-quest-title').textContent = '퀘스트 수정';
+  document.getElementById('btn-submit-quest').textContent = '저장';
+  document.getElementById('quest-editing-id').value = q.id;
+  document.getElementById('quest-title').value = q.title;
+  document.getElementById('quest-type').value = q.quest_type;
+  document.getElementById('quest-reward').value = q.intimacy_reward;
+  document.getElementById('quest-need-id').value = q.need_id || '';
+
+  const isDaily = q.quest_type === 'daily';
+  document.getElementById('routine-section').style.display = isDaily ? '' : 'none';
+
+  if (isDaily && q.routine) {
+    const rType = q.routine.type || 'daily';
+    document.getElementById('routine-type').value = rType;
+    document.getElementById('routine-days').style.display = rType === 'weekly' ? '' : 'none';
+    document.getElementById('routine-dates').style.display = rType === 'monthly' ? '' : 'none';
+
+    document.querySelectorAll('#routine-days input[type=checkbox]').forEach(c => {
+      c.checked = rType === 'weekly' && (q.routine.days || []).includes(parseInt(c.value));
+    });
+    document.getElementById('routine-dates-input').value =
+      rType === 'monthly' ? (q.routine.dates || []).join(',') : '';
+  } else {
+    document.getElementById('routine-type').value = 'daily';
+    document.getElementById('routine-days').style.display = 'none';
+    document.getElementById('routine-dates').style.display = 'none';
+    document.querySelectorAll('#routine-days input[type=checkbox]').forEach(c => c.checked = false);
+    document.getElementById('routine-dates-input').value = '';
+  }
+
   document.getElementById('modal-quest').classList.add('open');
 }
 
@@ -777,9 +816,14 @@ async function submitQuest() {
     }
   }
 
-  await api('POST', '/quests', {
-    need_id: needId, title, quest_type: questType, routine, intimacy_reward: reward
-  });
+  const editingId = document.getElementById('quest-editing-id').value;
+  if (editingId) {
+    await api('PATCH', `/quests/${editingId}`, { title, quest_type: questType, routine, intimacy_reward: reward });
+  } else {
+    await api('POST', '/quests', {
+      need_id: needId, title, quest_type: questType, routine, intimacy_reward: reward
+    });
+  }
   closeModal('modal-quest');
   await renderQuestContent();
 }

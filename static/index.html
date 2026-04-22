@@ -152,7 +152,7 @@
 <!-- 퀘스트 추가 모달 -->
 <div class="modal-overlay" id="modal-quest">
   <div class="modal">
-    <h2>퀘스트 추가</h2>
+    <h2 id="modal-quest-title">퀘스트 추가</h2>
     <div class="form-row">
       <label class="form-label">제목</label>
       <input class="input" id="quest-title" placeholder="주 1회 전화하기">
@@ -193,8 +193,9 @@
       <input class="input" id="quest-reward" type="number" value="10">
     </div>
     <input type="hidden" id="quest-need-id">
+    <input type="hidden" id="quest-editing-id">
     <div style="display:flex;gap:8px;margin-top:16px">
-      <button class="btn btn-primary" onclick="submitQuest()">추가</button>
+      <button class="btn btn-primary" id="btn-submit-quest" onclick="submitQuest()">추가</button>
       <button class="btn" onclick="closeModal('modal-quest')">취소</button>
     </div>
   </div>
